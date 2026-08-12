@@ -22,7 +22,10 @@ export interface QRConfig {
 
 export const DEFAULT_CONFIG: QRConfig = {
   data: 'https://qrc-gen.vercel.app',
-  size: 320,
+  // Render resolution, not display size — QRPreview scales the canvas down to
+  // fit its container. 640 keeps the preview sharp on 2x/3x phone screens and
+  // is the resolution downloads come out at.
+  size: 640,
   fgColor: '#39FF7A',
   bgColor: '#0A0A0A',
   dotStyle: 'rounded',
@@ -53,7 +56,9 @@ export function buildOptions(config: QRConfig, image?: string): Options {
     imageOptions: {
       hideBackgroundDots: true,
       imageSize: 0.35,
-      margin: 6,
+      // Proportional to the render size so the safe-zone gap around the overlay
+      // looks the same whatever resolution we render at.
+      margin: Math.round(config.size * 0.02),
       crossOrigin: 'anonymous',
     },
     dotsOptions: {

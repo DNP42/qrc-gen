@@ -32,7 +32,9 @@ export function StylePanel({ config, onChange }: Props) {
   return (
     <div className="space-y-5">
       <Section title="Color preset">
-        <div className="grid grid-cols-3 gap-2">
+        {/* Two columns on phones — three 96px-wide cells can't hold two swatches
+            plus a label like "inverted" without spilling. */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {PRESETS.map((p) => {
             const active = config.fgColor === p.fg && config.bgColor === p.bg;
             return (

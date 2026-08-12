@@ -13,10 +13,7 @@ const QRPreview = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div
-        className="rounded-lg border border-[var(--border)] flex items-center justify-center font-mono text-xs text-[var(--muted)]"
-        style={{ width: 320, height: 320 }}
-      >
+      <div className="w-full max-w-[320px] aspect-square mx-auto rounded-lg border border-[var(--border)] flex items-center justify-center font-mono text-xs text-[var(--muted)]">
         booting matrix…
       </div>
     ),
@@ -42,7 +39,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between gap-4">
           <div>
             <h1 className="font-mono text-lg text-[var(--hawk)] hawk-glow scanline">
               qrc-gen
@@ -62,7 +59,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-10">
         <div className="mb-10">
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight">
             Generate QR codes.{' '}
@@ -76,8 +73,11 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_auto] gap-10">
-          <div className="space-y-8">
+        {/* min-w-0 on both tracks: grid items default to min-width:auto, which
+            lets wide content (long URLs, the QR canvas) blow past the viewport
+            instead of shrinking. */}
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_auto] gap-6 lg:gap-10">
+          <div className="space-y-8 min-w-0">
             <Card title="Content">
               <ContentTabs onChange={handleContent} />
             </Card>
@@ -87,7 +87,7 @@ export default function Home() {
             </Card>
           </div>
 
-          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <div className="space-y-6 min-w-0 lg:sticky lg:top-6 lg:self-start">
             <Card title="Preview">
               <QRPreview config={config} ref={previewRef} />
             </Card>
@@ -100,7 +100,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-[var(--border)] mt-10">
-        <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
           <span>
             built in the void · open source · vibe by{' '}
             <span className="text-[var(--hawk)]">SpectreHawk</span>
@@ -124,7 +124,7 @@ export default function Home() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+    <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
       <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
         {title}
       </h3>

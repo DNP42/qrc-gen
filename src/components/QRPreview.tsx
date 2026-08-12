@@ -49,10 +49,17 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
 
   return (
     <div className="flex flex-col items-center">
+      {/*
+        Display size is decoupled from render resolution. The canvas is rendered
+        at config.size (the resolution downloads get), then scaled to fit the
+        container by CSS — so a high-res QR never forces the page wider than the
+        viewport. Pinning width/height here to config.size is what used to push
+        the layout past the right edge on phones.
+      */}
       <div
         ref={containerRef}
-        className="rounded-lg overflow-hidden border border-[var(--border)] shadow-[0_0_40px_rgba(57,255,122,0.08)]"
-        style={{ width: config.size, height: config.size, background: config.bgColor }}
+        className="w-full max-w-[320px] aspect-square rounded-lg overflow-hidden border border-[var(--border)] shadow-[0_0_40px_rgba(57,255,122,0.08)] [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:block [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+        style={{ background: config.bgColor }}
       />
     </div>
   );
