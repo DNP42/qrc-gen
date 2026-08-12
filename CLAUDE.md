@@ -98,18 +98,31 @@ No test runner is wired up yet. When tests come, the natural targets are `lib/fo
 
 ## Deploy
 
-### Web UI
-```bash
-vercel              # preview deploy
-vercel --prod       # promote to production
-```
+### Web UI — Vercel, driven by Git (not the CLI)
 
-### API
+Vercel project `qrc-gen` under team `hrcos-projects`, connected to the GitHub repo. Push to `main`
+→ production; any other branch or PR → a preview build. Nobody runs `vercel --prod` by hand.
+
+Live on **qr.donotpanic.space**. Preview URLs and every `*.vercel.app` alias sit behind Vercel SSO
+(`all_except_custom_domains`), so the custom domain is the only publicly reachable one.
+
+🔴 **`api/` must stay out of the Vercel build.** Vercel's zero-config treats a root-level `api/`
+directory as Python serverless functions: it installs `api/requirements.txt` on every build and
+publishes `api/app/main.py` at `/api/app/main`. That endpoint 500s on import — `from app.models
+import ...` resolves only with the container's WORKDIR on sys.path, not Vercel's `/var/task`. It
+fails closed by accident, one import fix away from exposing `/qr` and `/batch` on the public domain
+with no auth and no rate limiting. **`.vercelignore` excludes `api` to prevent this — do not delete
+it**, and do not "fix" the 500 by making the import work.
+
+### API — Docker, never Vercel
 ```bash
 # Build image, push to registry, run on any free-tier VM
 docker build -t qrc-gen-api .
-# Target: qr.donotpanic.space behind nginx/Caddy with TLS
+# Target: behind nginx/Caddy with TLS
 ```
+
+⚠️ Unresolved: the API's intended host was also `qr.donotpanic.space`, which the web UI already
+occupies. Pick a subdomain (e.g. `api.donotpanic.space`) or a path split before deploying it.
 
 GitHub remote: **`git@github.com:hrco/qrc-gen.git`** (public repo — the tool itself is public-facing). Use the `hrco` GitHub account per global config.
 
