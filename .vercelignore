@@ -1,0 +1,15 @@
+# The FastAPI service in api/ ships as a Docker container (see api/Dockerfile),
+# never as Vercel Functions. Vercel's zero-config otherwise treats a root-level
+# api/ directory as Python serverless functions, which on every build:
+#
+#   1. installs api/requirements.txt into a Python 3.12 venv, and
+#   2. publishes api/app/main.py at /api/app/main
+#
+# That endpoint 500s on cold start — `from app.models import ...` only resolves
+# with the container's WORKDIR on sys.path, not Vercel's /var/task root. It also
+# means the public /qr and /batch endpoints are one import fix away from being
+# live on the marketing domain with no auth and no rate limiting.
+#
+# Excluding api/ keeps the Vercel project to what it is meant to be: the static
+# Next.js web UI.
+api
