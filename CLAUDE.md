@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -101,7 +103,7 @@ No test runner is wired up yet. When tests come, the natural targets are `lib/fo
 ### Web UI
 ```bash
 vercel              # preview deploy
-vercel --prod       # promote to production
+vercel --prod       # promote to production: human only (red line: no production deploys)
 ```
 
 ### API
