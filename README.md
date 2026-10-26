@@ -67,4 +67,3 @@ src/
 ## License
 
 MIT.
-<!-- test -->
