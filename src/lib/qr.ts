@@ -21,7 +21,7 @@ export interface QRConfig {
 }
 
 export const DEFAULT_CONFIG: QRConfig = {
-  data: 'https://qrc-gen.vercel.app',
+  data: 'https://qr.donotpanic.space',
   size: 320,
   fgColor: '#39FF7A',
   bgColor: '#0A0A0A',
