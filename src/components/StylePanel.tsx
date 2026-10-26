@@ -230,7 +230,7 @@ function OverlayControls({
         <div className="space-y-2">
           {/* Own button: the native file input's text follows the browser's
               language, not the page's. */}
-          <label className="field block font-sans cursor-pointer focus-within:border-[var(--hawk-dim)] focus-within:shadow-[0_0_0_3px_rgba(57,255,122,0.15)]">
+          <label className="field block font-sans cursor-pointer">
             {t.chooseImage}
             <input
               type="file"

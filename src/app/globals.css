@@ -69,7 +69,10 @@ body {
   font-size: 0.875rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.field:focus {
+/* :focus-within also lights up a .field that wraps a visually hidden input,
+   such as the image picker's <label>. */
+.field:focus,
+.field:focus-within {
   outline: none;
   border-color: var(--hawk-dim);
   box-shadow: 0 0 0 3px rgba(57, 255, 122, 0.15);
