@@ -53,7 +53,7 @@ export const sl: Dictionary = {
     },
     wifi: {
       ssid: 'Ime omrežja (SSID)',
-      ssidPlaceholder: 'moj-domaci-wifi',
+      ssidPlaceholder: 'moj-domači-wifi',
       encryption: 'Šifriranje',
       encryptionOptions: {
         WPA: 'WPA / WPA2 / WPA3',
