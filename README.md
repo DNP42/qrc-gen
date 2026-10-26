@@ -7,6 +7,8 @@ Encode URLs, Wi-Fi networks, or vCards. Drop in a logo or a few characters
 of center text — error correction auto-bumps so the result still scans.
 PNG and SVG export, all client-side.
 
+Reviewed by Claude
+
 ## Features
 
 - **3 content types** — URL/text, Wi-Fi network (WPA / WEP / open), vCard contact
