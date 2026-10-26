@@ -14,6 +14,7 @@ PNG and SVG export, all client-side.
 - **Auto error-correction bump** — switches to level H whenever an overlay is on, so the QR stays scannable through ~30% occlusion
 - **Style controls** — foreground/background colors, six color presets, six dot styles, three corner-square styles, two corner-dot styles
 - **PNG + SVG export** — vector output is a first-class citizen
+- **English + Slovenian** — `/en` and `/sl`, statically built; `/` picks one from the browser language
 - **Zero backend** — no API routes, no database, no telemetry. Everything runs in the browser.
 
 ## Stack
@@ -51,14 +52,17 @@ vercel --prod       # production
 ```
 src/
   app/
-    layout.tsx     → fonts, metadata, theme
-    page.tsx       → the single page (state + composition)
-    globals.css    → Tailwind + design tokens
+    [lang]/layout.tsx → fonts, per-language metadata, <html lang>
+    [lang]/page.tsx   → loads the EN or SL dictionary
+    globals.css       → Tailwind + design tokens
   components/
+    Generator.tsx     → the single page (state + composition)
+    LanguageSwitch.tsx → EN | SL links
     ContentTabs.tsx   → URL / Wi-Fi / vCard inputs
     StylePanel.tsx    → colors, dot styles, overlay controls
     QRPreview.tsx     → mounts qr-code-styling, redraws on config change
     DownloadBar.tsx   → PNG + SVG download
+  i18n/               → EN/SL dictionaries, locale config, plural helper
   lib/
     qr.ts             → QRConfig + buildOptions() + textToImage()
     formatters.ts     → encodeUrl / encodeWifi / encodeVCard

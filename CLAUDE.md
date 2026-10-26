@@ -15,7 +15,9 @@ Guidance for Claude Code in this repository. It overrides `~/AirLab/CLAUDE.md`.
 
    Styling the controls around the QR, copy, and layout are not "generation logic".
 2. **Keep the UI bilingual: English (EN) and Slovenian (SL).** Every user-visible string you add or change ships in both languages in the same commit, including labels, placeholders, errors, `aria-label`s, alt text and metadata. Never hard-code a one-language string in a component.
-   - Current state: the UI is English-only (`layout.tsx` sets `lang="en"`) and there is no i18n layer yet. Adding one (library choice, locale routing, `lang` switching) is an architectural change: plan it and ask before building it.
+   - How: add the key to `src/i18n/dictionaries/en.ts` and the same key to `sl.ts`, then read it with `useDict()` (client) or `getDictionary()` (server). `sl.ts` is typed against `en.ts`, so a missing SL key fails `next build`; `react/jsx-no-literals` fails `npm run lint` on inline JSX text. Attributes (placeholder, alt, aria-label) are not linted: check them yourself.
+   - Values that get encoded (Wi-Fi `WPA`/`WEP`/`nopass`, dot/corner style ids) are never translated; only their display labels are.
+   - Changing the i18n approach itself (library, routing, adding a language) is an architectural change: plan it and ask first.
 3. **Small, focused commits.** One intent per commit, prefixes `feat: fix: test: docs: chore:`, body says why. Do not mix a refactor, a feature and a dependency bump in one commit.
 4. Work on a branch, open a PR, never push to `main`. `npm` only; never write a pnpm/yarn/bun lockfile.
 
@@ -37,14 +39,25 @@ Remote: `github.com/DNP42/qrc-gen` (public). The Claude GitHub App workflow is s
 ```
 src/
   app/
-    layout.tsx           root layout, fonts, dark theme, OG metadata, <html lang>
-    page.tsx             the single page; owns the QRConfig state
+    [lang]/
+      layout.tsx         root layout: fonts, <html lang>, per-language metadata + hreflang,
+                         builds /en and /sl only (dynamicParams = false)
+      page.tsx           loads the dictionary, wraps Generator in I18nProvider
     globals.css          Tailwind v4 CSS-first config + neon accent tokens
   components/
+    Generator.tsx        the single page body; owns the QRConfig state
+    LanguageSwitch.tsx   EN | SL links in the header
     ContentTabs.tsx      URL/Text, Wi-Fi, vCard inputs
     StylePanel.tsx       colors, presets, dot/corner styles, overlay toggle
     QRPreview.tsx        mounts qr-code-styling, redraws on config change
     DownloadBar.tsx      PNG + SVG download
+  i18n/
+    config.ts            locales, defaultLocale, hasLocale(), og:locale tags
+    dictionaries/en.ts   EN strings; defines the `Dictionary` type
+    dictionaries/sl.ts   SL strings, typed as `Dictionary`
+    get-dictionary.ts    server-side loader, one language per page
+    I18nProvider.tsx     client context: useDict(), useLocale()
+    format.ts            interpolate() + plural() via Intl.PluralRules
   lib/
     qr.ts                QRConfig type + buildOptions() → qr-code-styling Options
     formatters.ts        encodeURL / encodeWifi / encodeVCard → the encoded string
@@ -62,7 +75,8 @@ api/
 
 - **Client-side only.** `qr-code-styling` touches `window` and breaks during SSR. QR code runs in client components or `useEffect`; load the preview with a dynamic import and `ssr: false`.
 - **Next.js 16 differs from older versions.** Read `node_modules/next/dist/docs/` before using a Next API (see `AGENTS.md`).
-- **One source of truth.** One `QRConfig` object lives in `page.tsx` state and is passed down; children emit changes through callbacks. No global store.
+- **One source of truth.** One `QRConfig` object lives in `Generator.tsx` state and is passed down; children emit changes through callbacks. No global store.
+- **The URL is the language.** `/en` and `/sl` are static pages; `/` redirects by the browser's first language (`next.config.ts`). No cookie, no localStorage, no proxy. Switching language loads the other page and resets the form.
 - **Auto error-correction bump.** With an overlay (logo image or center text) on, error correction goes from M to H. Users never see the EC level.
 - **Formatters are pure.** They turn typed form state into the plain string the QR encodes. Keep them small, pure and testable.
 - **Center text is rendered, not encoded.** The overlay text is drawn over the QR; the payload stays the URL/Wi-Fi/vCard string.
@@ -148,7 +162,6 @@ npm run lint && npm run build
 
 ## Post-v1 ideas (not started; ask before picking one up)
 
-- EN/SL i18n layer for the Web UI (see Rule 2).
 - Web UI calls `/qr` as a fallback when `qr-code-styling` cannot handle a payload.
 - Styled server-side output (dot style, corners, gradients) in the API.
 - Batch from CSV upload → ZIP.
