@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
 import { DownloadBar } from '@/components/DownloadBar';
+import { LanguageSwitch } from '@/components/LanguageSwitch';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
@@ -42,14 +43,17 @@ export function Generator() {
               {t.header.tagline}
             </p>
           </div>
-          <a
-            href="https://github.com/hrco/qrc-gen"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-xs text-[var(--muted)] hover:text-[var(--hawk)] transition-colors"
-          >
-            {t.header.github}
-          </a>
+          <div className="flex items-center gap-5">
+            <LanguageSwitch />
+            <a
+              href="https://github.com/hrco/qrc-gen"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs text-[var(--muted)] hover:text-[var(--hawk)] transition-colors"
+            >
+              {t.header.github}
+            </a>
+          </div>
         </div>
       </header>
 
