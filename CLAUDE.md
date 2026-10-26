@@ -43,6 +43,9 @@ src/
       layout.tsx         root layout: fonts, <html lang>, per-language metadata + hreflang,
                          builds /en and /sl only (dynamicParams = false)
       page.tsx           loads the dictionary, wraps Generator in I18nProvider
+    global-not-found.tsx 404 for unknown URLs: its own <html>, EN and SL blocks side by side
+                         (needs `experimental.globalNotFound` in next.config.ts)
+    fonts.ts             Geist / Geist Mono, shared by the [lang] layout and the 404 page
     globals.css          Tailwind v4 CSS-first config + neon accent tokens
   components/
     Generator.tsx        the single page body; owns the QRConfig state
@@ -76,7 +79,7 @@ api/
 - **Client-side only.** `qr-code-styling` touches `window` and breaks during SSR. QR code runs in client components or `useEffect`; load the preview with a dynamic import and `ssr: false`.
 - **Next.js 16 differs from older versions.** Read `node_modules/next/dist/docs/` before using a Next API (see `AGENTS.md`).
 - **One source of truth.** One `QRConfig` object lives in `Generator.tsx` state and is passed down; children emit changes through callbacks. No global store.
-- **The URL is the language.** `/en` and `/sl` are static pages; `/` redirects by the browser's first language (`next.config.ts`). No cookie, no localStorage, no proxy. Switching language loads the other page and resets the form.
+- **The URL is the language.** `/en` and `/sl` are static pages; `/` redirects by the browser's first language (`next.config.ts`). No cookie, no localStorage, no proxy. Switching language loads the other page and resets the form. An unknown URL has no language, so its 404 shows both (`global-not-found.tsx`).
 - **Auto error-correction bump.** With an overlay (logo image or center text) on, error correction goes from M to H. Users never see the EC level.
 - **Formatters are pure.** They turn typed form state into the plain string the QR encodes. Keep them small, pure and testable.
 - **Payloads are UTF-8.** `buildOptions()` passes `config.data` through `toByteString()` because qr-code-styling's encoder truncates characters to 8 bits (`ž` → `~`). Keep it, and test any QR change with č/š/ž, not only ASCII.

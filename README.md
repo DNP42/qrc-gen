@@ -54,6 +54,8 @@ src/
   app/
     [lang]/layout.tsx → fonts, per-language metadata, <html lang>
     [lang]/page.tsx   → loads the EN or SL dictionary
+    global-not-found.tsx → 404 page (EN + SL)
+    fonts.ts          → Geist fonts shared by the layout and the 404 page
     globals.css       → Tailwind + design tokens
   components/
     Generator.tsx     → the single page (state + composition)

@@ -34,6 +34,11 @@ export const sl: Dictionary = {
     builtBy: 'zgrajeno v praznini · odprta koda · vajb:',
     poweredBy: 'poganja',
   },
+  notFound: {
+    heading: 'Signala ni.',
+    body: 'Te strani ni. Praznino smo preverili dvakrat.',
+    back: 'nazaj na generator →',
+  },
   content: {
     tabs: {
       url: 'URL / besedilo',

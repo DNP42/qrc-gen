@@ -44,6 +44,13 @@ export const en = {
     builtBy: 'built in the void · open source · vibe by',
     poweredBy: 'powered by',
   },
+  // Unknown URLs have no language, so global-not-found.tsx shows every
+  // language's block one after the other.
+  notFound: {
+    heading: 'Signal lost.',
+    body: 'No such page. We checked the void twice.',
+    back: 'back to the generator →',
+  },
   content: {
     tabs: {
       url: 'URL / Text',
