@@ -1,19 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, locales, ogLocales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { geistMono, geistSans } from "../fonts";
 import "../globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 // Absolute base for canonical, hreflang and OG URLs. Vercel sets the
 // production domain at build time; the fallback is the current production URL.
