@@ -14,7 +14,14 @@ export function DownloadBar({ previewRef, defaultName }: Props) {
   const fallbackName = t.defaultNames.url;
   const [name, setName] = useState(defaultName);
 
-  const safe = name.trim().replace(/[^a-zA-Z0-9_\-]/g, '-') || fallbackName;
+  // Drop combining marks first so č/š/ž become c/s/z ("račun" -> "racun")
+  // instead of "-" ("ra-un"); anything still outside ASCII becomes "-".
+  const safe =
+    name
+      .trim()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9_\-]/g, '-') || fallbackName;
 
   return (
     <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
