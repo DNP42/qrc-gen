@@ -20,7 +20,7 @@ export function DownloadBar({ previewRef, defaultName }: Props) {
     name
       .trim()
       .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9_\-]/g, '-') || fallbackName;
 
   return (
