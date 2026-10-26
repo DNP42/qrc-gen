@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
 import { DownloadBar } from '@/components/DownloadBar';
@@ -28,11 +28,7 @@ export function Generator() {
     setContentType(type);
   };
 
-  const filename = useMemo(() => {
-    if (contentType === 'wifi') return 'wifi-qr';
-    if (contentType === 'vcard') return 'vcard-qr';
-    return 'qrcode';
-  }, [contentType]);
+  const filename = t.download.defaultNames[contentType];
 
   return (
     <div className="min-h-screen flex flex-col">
