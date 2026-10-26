@@ -79,6 +79,7 @@ api/
 - **The URL is the language.** `/en` and `/sl` are static pages; `/` redirects by the browser's first language (`next.config.ts`). No cookie, no localStorage, no proxy. Switching language loads the other page and resets the form.
 - **Auto error-correction bump.** With an overlay (logo image or center text) on, error correction goes from M to H. Users never see the EC level.
 - **Formatters are pure.** They turn typed form state into the plain string the QR encodes. Keep them small, pure and testable.
+- **Payloads are UTF-8.** `buildOptions()` passes `config.data` through `toByteString()` because qr-code-styling's encoder truncates characters to 8 bits (`ž` → `~`). Keep it, and test any QR change with č/š/ž, not only ASCII.
 - **Center text is rendered, not encoded.** The overlay text is drawn over the QR; the payload stays the URL/Wi-Fi/vCard string.
 
 ## Visual identity
