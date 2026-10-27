@@ -10,6 +10,8 @@ import {
   type WifiEncryption,
   type WifiInput,
 } from '@/lib/formatters';
+import { useDict, useLocale } from '@/i18n/I18nProvider';
+import { plural } from '@/i18n/format';
 
 export type ContentType = 'url' | 'wifi' | 'vcard';
 
@@ -17,30 +19,29 @@ interface Props {
   onChange: (data: string, type: ContentType) => void;
 }
 
-const TABS: Array<{ id: ContentType; label: string }> = [
-  { id: 'url', label: 'URL / Text' },
-  { id: 'wifi', label: 'Wi-Fi' },
-  { id: 'vcard', label: 'vCard' },
-];
+const TABS: ContentType[] = ['url', 'wifi', 'vcard'];
+
+const WIFI_ENCRYPTIONS: WifiEncryption[] = ['WPA', 'WEP', 'nopass'];
 
 export function ContentTabs({ onChange }: Props) {
+  const t = useDict();
   const [active, setActive] = useState<ContentType>('url');
 
   return (
     <div>
       <div className="flex gap-1 mb-4 border-b border-[var(--border)]">
-        {TABS.map((t) => (
+        {TABS.map((id) => (
           <button
-            key={t.id}
-            onClick={() => setActive(t.id)}
+            key={id}
+            onClick={() => setActive(id)}
             className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border-b-2 transition-colors ${
-              active === t.id
+              active === id
                 ? 'border-[var(--hawk)] text-[var(--hawk)]'
                 : 'border-transparent text-[var(--muted)] hover:text-white'
             }`}
             type="button"
           >
-            {t.label}
+            {t.content.tabs[id]}
           </button>
         ))}
       </div>
@@ -53,6 +54,8 @@ export function ContentTabs({ onChange }: Props) {
 }
 
 function UrlForm({ onChange }: { onChange: (s: string) => void }) {
+  const t = useDict().content.url;
+  const locale = useLocale();
   const [input, setInput] = useState<UrlInput>({ text: 'https://qr.donotpanic.space' });
 
   const update = (next: UrlInput) => {
@@ -62,22 +65,23 @@ function UrlForm({ onChange }: { onChange: (s: string) => void }) {
 
   return (
     <div>
-      <label className="label">URL or any text</label>
+      <label className="label">{t.label}</label>
       <textarea
         className="field"
         rows={4}
         value={input.text}
         onChange={(e) => update({ text: e.target.value })}
-        placeholder="https://example.com or any string"
+        placeholder={t.placeholder}
       />
       <p className="mt-2 font-mono text-xs text-[var(--muted)]">
-        Encoded as plain text. {input.text.length} chars.
+        {t.encodedAs} {plural(locale, input.text.length, t.charCount)}.
       </p>
     </div>
   );
 }
 
 function WifiForm({ onChange }: { onChange: (s: string) => void }) {
+  const t = useDict().content.wifi;
   const [input, setInput] = useState<WifiInput>({
     ssid: '',
     password: '',
@@ -93,17 +97,17 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="label">Network name (SSID)</label>
+        <label className="label">{t.ssid}</label>
         <input
           className="field"
           value={input.ssid}
           onChange={(e) => update({ ...input, ssid: e.target.value })}
-          placeholder="my-home-wifi"
+          placeholder={t.ssidPlaceholder}
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label">Encryption</label>
+          <label className="label">{t.encryption}</label>
           <select
             className="field"
             value={input.encryption}
@@ -111,25 +115,27 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
               update({ ...input, encryption: e.target.value as WifiEncryption })
             }
           >
-            <option value="WPA">WPA / WPA2 / WPA3</option>
-            <option value="WEP">WEP</option>
-            <option value="nopass">None (open)</option>
+            {WIFI_ENCRYPTIONS.map((enc) => (
+              <option key={enc} value={enc}>
+                {t.encryptionOptions[enc]}
+              </option>
+            ))}
           </select>
         </div>
         <div>
-          <label className="label">Hidden network</label>
+          <label className="label">{t.hidden}</label>
           <button
             type="button"
             onClick={() => update({ ...input, hidden: !input.hidden })}
             className={`field text-left ${input.hidden ? 'text-[var(--hawk)]' : ''}`}
           >
-            {input.hidden ? '● yes' : '○ no'}
+            {input.hidden ? `● ${t.yes}` : `○ ${t.no}`}
           </button>
         </div>
       </div>
       {input.encryption !== 'nopass' && (
         <div>
-          <label className="label">Password</label>
+          <label className="label">{t.password}</label>
           <input
             type="text"
             className="field"
@@ -144,6 +150,7 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
 }
 
 function VCardForm({ onChange }: { onChange: (s: string) => void }) {
+  const t = useDict().content.vcard;
   const [input, setInput] = useState<VCardInput>({
     firstName: '',
     lastName: '',
@@ -159,14 +166,14 @@ function VCardForm({ onChange }: { onChange: (s: string) => void }) {
     onChange(encodeVCard(next));
   };
 
-  const field = <K extends keyof VCardInput>(key: K, label: string, placeholder?: string) => (
+  const field = (key: keyof VCardInput) => (
     <div>
-      <label className="label">{label}</label>
+      <label className="label">{t[key].label}</label>
       <input
         className="field"
         value={input[key]}
         onChange={(e) => update({ ...input, [key]: e.target.value })}
-        placeholder={placeholder}
+        placeholder={t[key].placeholder}
       />
     </div>
   );
@@ -174,16 +181,16 @@ function VCardForm({ onChange }: { onChange: (s: string) => void }) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        {field('firstName', 'First name', 'Ada')}
-        {field('lastName', 'Last name', 'Lovelace')}
+        {field('firstName')}
+        {field('lastName')}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {field('organization', 'Organization', 'Analytical Engine Co.')}
-        {field('title', 'Title', 'Mathematician')}
+        {field('organization')}
+        {field('title')}
       </div>
-      {field('phone', 'Phone', '+1 555 0100')}
-      {field('email', 'Email', 'ada@example.com')}
-      {field('url', 'Website', 'https://example.com')}
+      {field('phone')}
+      {field('email')}
+      {field('url')}
     </div>
   );
 }
