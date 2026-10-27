@@ -12,6 +12,8 @@ export type Overlay =
 export interface QRConfig {
   data: string;
   size: number;
+  /** Quiet zone in pixels on each side. qr-code-styling's `margin` is pixels, not modules. */
+  margin: number;
   fgColor: string;
   bgColor: string;
   dotStyle: DotStyle;
@@ -20,9 +22,19 @@ export interface QRConfig {
   overlay: Overlay;
 }
 
+/** Slider bounds. The max is a quarter of the default canvas, so the matrix still has room. */
+export const MARGIN_MIN = 0;
+export const MARGIN_MAX = 80;
+/**
+ * ~4 modules on the default 320px code (version ~3). The spec quiet zone is 4
+ * modules; much less and phones start missing the code.
+ */
+export const MARGIN_DEFAULT = 40;
+
 export const DEFAULT_CONFIG: QRConfig = {
   data: 'https://qr.donotpanic.space',
   size: 320,
+  margin: MARGIN_DEFAULT,
   fgColor: '#39FF7A',
   bgColor: '#0A0A0A',
   dotStyle: 'rounded',
@@ -30,6 +42,13 @@ export const DEFAULT_CONFIG: QRConfig = {
   cornerDotStyle: 'dot',
   overlay: { kind: 'none' },
 };
+
+/** Keep the quiet zone inside the canvas. A margin of size/2 leaves nothing to draw. */
+export function clampMargin(margin: number, size: number): number {
+  const max = Math.min(MARGIN_MAX, Math.max(MARGIN_MIN, Math.floor(size / 4)));
+  if (!Number.isFinite(margin)) return Math.min(MARGIN_DEFAULT, max);
+  return Math.min(max, Math.max(MARGIN_MIN, Math.round(margin)));
+}
 
 /**
  * Map our config to qr-code-styling's Options.
@@ -46,6 +65,7 @@ export function buildOptions(config: QRConfig, image?: string): Options {
     height: config.size,
     type: 'canvas',
     data: toByteString(config.data || ' '),
+    margin: clampMargin(config.margin, config.size),
     image,
     qrOptions: {
       errorCorrectionLevel: hasOverlay ? 'H' : 'M',

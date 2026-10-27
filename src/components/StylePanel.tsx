@@ -1,14 +1,18 @@
 'use client';
 
-import type {
-  CornerDotStyle,
-  CornerSquareStyle,
-  DotStyle,
-  Overlay,
-  QRConfig,
-} from '@/lib/qr';
 import { useDict } from '@/i18n/I18nProvider';
 import type { Dictionary } from '@/i18n/dictionaries/en';
+import { interpolate } from '@/i18n/format';
+import {
+  MARGIN_MAX,
+  MARGIN_MIN,
+  clampMargin,
+  type CornerDotStyle,
+  type CornerSquareStyle,
+  type DotStyle,
+  type Overlay,
+  type QRConfig,
+} from '@/lib/qr';
 
 interface Props {
   config: QRConfig;
@@ -103,6 +107,25 @@ export function StylePanel({ config, onChange }: Props) {
           value={config.cornerDotStyle}
           onChange={(cornerDotStyle) => update({ cornerDotStyle })}
         />
+      </Section>
+
+      <Section title={t.padding}>
+        <div className="flex items-center gap-3">
+          <input
+            type="range"
+            className="range"
+            min={MARGIN_MIN}
+            max={MARGIN_MAX}
+            step={2}
+            value={config.margin}
+            aria-label={t.padding}
+            onChange={(e) => update({ margin: clampMargin(Number(e.target.value), config.size) })}
+          />
+          <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
+            {interpolate(t.paddingValue, { n: config.margin })}
+          </span>
+        </div>
+        <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.paddingHint}</p>
       </Section>
 
       <Section title={t.overlay}>
