@@ -45,7 +45,7 @@ export function buildOptions(config: QRConfig, image?: string): Options {
     width: config.size,
     height: config.size,
     type: 'canvas',
-    data: config.data || ' ',
+    data: toByteString(config.data || ' '),
     image,
     qrOptions: {
       errorCorrectionLevel: hasOverlay ? 'H' : 'M',
@@ -72,6 +72,18 @@ export function buildOptions(config: QRConfig, image?: string): Options {
       type: config.cornerDotStyle,
     },
   };
+}
+
+/**
+ * qr-code-styling's bundled encoder keeps only the low 8 bits of each
+ * character, so `ž` (U+017E) is written as `~` (0x7E). Passing the UTF-8
+ * bytes one character per byte makes it write real UTF-8. ASCII input is
+ * unchanged: same mode, same matrix.
+ */
+function toByteString(text: string): string {
+  let out = '';
+  for (const byte of new TextEncoder().encode(text)) out += String.fromCharCode(byte);
+  return out;
 }
 
 /**
