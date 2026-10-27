@@ -49,9 +49,13 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
 
   return (
     <div className="flex flex-col items-center">
+      {/* box-content: the canvas is exactly config.size. A border-box of that
+          width would shrink the content box by the stroke, and overflow-hidden
+          would clip the canvas over the border. hawk-dim reads on the dark card;
+          --border (#1f1f1f) does not. */}
       <div
         ref={containerRef}
-        className="rounded-lg overflow-hidden border border-[var(--border)] shadow-[0_0_40px_rgba(57,255,122,0.08)]"
+        className="box-content flex items-center justify-center rounded-lg overflow-hidden border border-[var(--hawk-dim)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
         style={{ width: config.size, height: config.size, background: config.bgColor }}
       />
     </div>
