@@ -1,148 +1,174 @@
+@AGENTS.md
+
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in this repository. It overrides `~/AirLab/CLAUDE.md`.
 
-## What This Is
+## Rules
 
-A public, free QR code generator with a SpectreHawk-flavored dark UI, **plus a stateless Docker microservice API** for programmatic QR generation. Two halves:
+1. **Do not change QR generation logic without asking first.** Propose the change, wait for a yes. This covers:
+   - `src/lib/qr.ts`: `QRConfig`, `buildOptions()`, the M → H error-correction bump
+   - `src/lib/formatters.ts`: the encoded payload strings (URL, `WIFI:`, vCard)
+   - `src/components/QRPreview.tsx`: how `qr-code-styling` is mounted and redrawn
+   - `api/app/qr_generator.py`: segno matrix, logo compositing, logo download
+   - Defaults and limits that change what gets encoded or how it scans (`api/app/models.py` caps, EC levels, margins)
+
+   Styling the controls around the QR, copy, and layout are not "generation logic".
+2. **Keep the UI bilingual: English (EN) and Slovenian (SL).** Every user-visible string you add or change ships in both languages in the same commit, including labels, placeholders, errors, `aria-label`s, alt text and metadata. Never hard-code a one-language string in a component.
+   - How: add the key to `src/i18n/dictionaries/en.ts` and the same key to `sl.ts`, then read it with `useDict()` (client) or `getDictionary()` (server). `sl.ts` is typed against `en.ts`, so a missing SL key fails `next build`; `npm run lint` fails on inline JSX text, on `{'text'}` children and on text in `placeholder`, `alt`, `title`, `aria-label` and the other aria text attributes (`eslint.config.mjs`). Words only: `#000000`, `|` and `••••` pass. Other attributes and non-JSX strings (errors thrown, `alert()`) are not linted: check them yourself.
+   - Values that get encoded (Wi-Fi `WPA`/`WEP`/`nopass`, dot/corner style ids) are never translated; only their display labels are.
+   - Changing the i18n approach itself (library, routing, adding a language) is an architectural change: plan it and ask first.
+3. **Small, focused commits.** One intent per commit, prefixes `feat: fix: test: docs: chore:`, body says why. Do not mix a refactor, a feature and a dependency bump in one commit.
+4. Work on a branch, open a PR, never push to `main`. `npm` only; never write a pnpm/yarn/bun lockfile.
+
+## What this is
+
+A public, free QR code generator with a SpectreHawk-flavored dark UI, plus a stateless API for programmatic QR generation. Two independent halves in one repo:
 
 | Component | Location | Stack | Deploy |
 |-----------|----------|-------|--------|
-| **Web UI** | `src/` | Next.js 16 + TS + Tailwind v4 + `qr-code-styling` | Vercel (free, static) |
-| **API** | `api/` | Python + FastAPI + segno + Pillow | Docker container (fly.io / free-tier VM) |
+| **Web UI** | `src/` | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4 + `qr-code-styling` | Vercel, static |
+| **API** | `api/` | Python 3.12 + FastAPI + segno + Pillow + httpx | Docker container, not deployed yet |
 
-The Web UI is fully client-side — no API routes, no database, no auth. The API is independently deployable and handles logo embedding + batch ZIP generation.
+The Web UI is fully client-side: no API routes, no database, no auth, no telemetry. The API handles logo embedding and batch ZIP generation.
 
-## Stack
+Remote: `github.com/DNP42/qrc-gen` (public). The Claude GitHub App workflow is set up for `@claude` mentions in issues and PRs.
 
-### Web UI (`src/`)
-- **Next.js 16** (App Router, src dir, Turbopack dev)
-- **TypeScript**
-- **Tailwind CSS v4**
-- **`qr-code-styling`** — the QR engine. Chosen over `qrcode` because it natively supports rounded dots, custom corner ("eye") shapes, gradients, and logo-image overlay with safe-zone clearing. All work is client-side; the lib uses canvas + SVG under the hood.
+## Folder structure
 
-### API (`api/`)
-- **Python 3.12 + FastAPI** — async endpoint handlers
-- **segno** — QR matrix generation (SVG + PNG output)
-- **Pillow** — logo compositing, PNG encoding
-- **httpx** — async logo URL fetching
-- Single container, stateless, runs on `:8080`
-- Health check at `GET /health`
-- CORS enabled for browser access
-
-## Architecture
-
-### Web UI (`src/`)
 ```
 src/
   app/
-    layout.tsx     → root layout, fonts, dark theme defaults, OG metadata
-    page.tsx       → the single page: hero + tabs + customization + preview + download
-    globals.css    → Tailwind base + neon accent CSS vars
+    [lang]/
+      layout.tsx         root layout: fonts, <html lang>, per-language metadata + hreflang,
+                         builds /en and /sl only (dynamicParams = false)
+      page.tsx           loads the dictionary, wraps Generator in I18nProvider
+    global-not-found.tsx 404 for unknown URLs: its own <html>, EN and SL blocks side by side
+                         (needs `experimental.globalNotFound` in next.config.ts)
+    fonts.ts             Geist / Geist Mono, shared by the [lang] layout and the 404 page
+    globals.css          Tailwind v4 CSS-first config + neon accent tokens
   components/
-    ContentTabs/   → URL/Text, WiFi, vCard inputs (one component per type)
-    StylePanel/    → color pickers, dot/eye style selectors, optional overlay toggle
-    QRPreview/     → mounts qr-code-styling into a ref'd div, redraws on config change
-    DownloadBar/   → PNG + SVG download buttons
+    Generator.tsx        the single page body; owns the QRConfig state
+    LanguageSwitch.tsx   EN | SL links in the header
+    ContentTabs.tsx      URL/Text, Wi-Fi, vCard inputs
+    StylePanel.tsx       colors, presets, dot/corner styles, overlay toggle
+    QRPreview.tsx        mounts qr-code-styling, redraws on config change
+    DownloadBar.tsx      PNG + SVG download
+  i18n/
+    config.ts            locales, defaultLocale, hasLocale(), og:locale tags
+    dictionaries/en.ts   EN strings; defines the `Dictionary` type
+    dictionaries/sl.ts   SL strings, typed as `Dictionary`
+    get-dictionary.ts    server-side loader, one language per page
+    I18nProvider.tsx     client context: useDict(), useLocale()
+    format.ts            interpolate() + plural() via Intl.PluralRules
   lib/
-    qr.ts          → QRConfig type + buildOptions() that maps config → qr-code-styling Options
-    formatters.ts  → encodeURL(), encodeWifi(), encodeVCard() — turn typed input into the string the QR encodes
-```
-
-### API (`api/`)
-```
+    qr.ts                QRConfig type + buildOptions() → qr-code-styling Options
+    formatters.ts        encodeURL / encodeWifi / encodeVCard → the encoded string
 api/
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-├── README.md
-└── app/
-    ├── main.py          # FastAPI app, CORS, GET /qr, POST /batch, GET /health
-    ├── models.py        # Pydantic models + input validation (size, hex, batch caps)
-    └── qr_generator.py  # segno QR gen + Pillow logo compositing + httpx logo download
+  Dockerfile, docker-compose.yml, requirements.txt, README.md
+  app/
+    main.py              FastAPI app, CORS, GET /health, GET /qr, POST /batch
+    models.py            Pydantic models + input validation (size, hex, batch cap)
+    qr_generator.py      segno QR + Pillow logo compositing + SSRF-safe logo fetch
 ```
 
-### Key architectural rules
+`README.md` and `DIRECTORY-SUMMARY.md` are the public-facing descriptions; keep them in sync when features change.
 
-- **Client-side only.** Anything QR-generation-related must be a client component or run in `useEffect`. `qr-code-styling` touches `window` and breaks during SSR. Use dynamic imports with `ssr: false` for the preview component.
-- **Single source of truth.** The whole UI is driven by one `QRConfig` object held in `app/page.tsx` state and passed down. Children emit changes via callbacks — no global store needed for v1.
-- **Auto error-correction bump.** When the optional overlay (logo image OR center text) is enabled, the QR config silently switches error correction from `M` → `H` so the overlay's ~20% center occlusion stays scannable. Users never see the EC level — it's an implementation detail.
-- **Formatters are pure.** `encodeWifi()` / `encodeVCard()` return plain strings (`WIFI:T:WPA;S:...;P:...;;`, `BEGIN:VCARD\n...END:VCARD`). They're the boundary between typed-form state and the generic QR engine. Keep them small, pure, and tested.
-- **Center text is rendered, not encoded.** When the overlay is "short text," it is drawn as an image overlay on top of the QR — it's NOT part of the encoded payload. The encoded payload is still the URL/WiFi/vCard string.
+## Architecture rules
 
-### Visual identity
+- **Client-side only.** `qr-code-styling` touches `window` and breaks during SSR. QR code runs in client components or `useEffect`; load the preview with a dynamic import and `ssr: false`.
+- **Next.js 16 differs from older versions.** Read `node_modules/next/dist/docs/` before using a Next API (see `AGENTS.md`).
+- **One source of truth.** One `QRConfig` object lives in `Generator.tsx` state and is passed down; children emit changes through callbacks. No global store.
+- **The URL is the language.** `/en` and `/sl` are static pages; `/` redirects by the browser's first language (`next.config.ts`). No cookie, no localStorage, no proxy. Switching language loads the other page and resets the form. An unknown URL has no language, so its 404 shows both (`global-not-found.tsx`).
+- **Auto error-correction bump.** With an overlay (logo image or center text) on, error correction goes from M to H. Users never see the EC level.
+- **Formatters are pure.** They turn typed form state into the plain string the QR encodes. Keep them small, pure and testable.
+- **Payloads are UTF-8.** `buildOptions()` passes `config.data` through `toByteString()` because qr-code-styling's encoder truncates characters to 8 bits (`ž` → `~`). Keep it, and test any QR change with č/š/ž, not only ASCII.
+- **Center text is rendered, not encoded.** The overlay text is drawn over the QR; the payload stays the URL/Wi-Fi/vCard string.
 
-- Black background, neon accent (cyan/hawk-green), monospace font for code-y bits.
-- Terminal/oracle vibe — see [hrco/hawkaicli](https://github.com/hrco/hawkaicli) for tonal reference.
-- Tagline carries SpectreHawk attitude — punchy, ~20% sarcasm, never overkill.
+## Visual identity
 
-## Commands
+Black background, neon accent (cyan / hawk-green), monospace for code-like bits. Terminal/oracle tone; taglines punchy with ~20% sarcasm, never overkill. The SL copy keeps the same tone; do not translate jokes word for word.
+
+## Run
 
 ### Web UI
+
 ```bash
-npm run dev      # Turbopack dev server on :3000
-npm run build    # production build
+npm install
+npm run dev      # Turbopack dev server on http://localhost:3000
+npm run build    # static production build
 npm run start    # serve the production build
 npm run lint     # ESLint
 ```
 
 ### API
+
+Docker is not installed on the dev laptop. Run it on a machine that has Docker, or run it directly with Python 3.12:
+
 ```bash
 cd api
-docker compose up --build   # build and run on :8080
-docker build -t qrc-gen-api . && docker run -d -p 8080:8080 qrc-gen-api
+docker compose up --build                     # http://localhost:8080
+# without Docker:
+uv venv -p 3.12 && uv pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --port 8080
 ```
 
-No test runner is wired up yet. When tests come, the natural targets are `lib/formatters.ts` (pure string transformers) — Vitest fits the Next.js + TS stack; and `api/app/` (pytest + httpx for endpoint tests).
+## Test
+
+No test runner exists yet. Verification today is lint + type-check + build for the UI, and a manual check of the API:
+
+```bash
+curl -s localhost:8080/health                         # {"status":"ok"}
+curl -s "localhost:8080/qr?data=hello" -o /tmp/qr.png # then scan it
+```
+
+After any change near the QR output, scan the result with a phone: test PNG and SVG, with and without an overlay.
+
+Adding a runner changes the dependency posture: propose it first. The planned targets are Vitest for `src/lib/formatters.ts` and `src/lib/qr.ts`, and pytest + httpx for `api/app/`.
+
+## Gate
+
+```bash
+npm run lint && npm run build
+```
+
+`next build` also type-checks. The API has no automated gate yet; say so when a change touches `api/`.
 
 ## Deploy
 
-### Web UI
-```bash
-vercel              # preview deploy
-vercel --prod       # promote to production
-```
+- Web UI: `vercel` for a preview. `vercel --prod` is human-only.
+- API: build the image and run it behind nginx/Caddy with TLS, target `qr.donotpanic.space`. Pushing images and production deploys are human-only.
 
-### API
-```bash
-# Build image, push to registry, run on any free-tier VM
-docker build -t qrc-gen-api .
-# Target: qr.donotpanic.space behind nginx/Caddy with TLS
-```
-
-GitHub remote: **`git@github.com:hrco/qrc-gen.git`** (public repo — the tool itself is public-facing). Use the `hrco` GitHub account per global config.
-
-## API Reference
+## API reference
 
 ### `GET /health` → `{"status":"ok"}`
 
 ### `GET /qr`
-| Param  | Type   | Required | Default  | Limits                    |
-|--------|--------|----------|----------|---------------------------|
-| data   | string | yes      | —        | 1–4096 chars              |
-| format | string | no       | png      | png, svg                  |
-| size   | int    | no       | 400      | 80–4096                   |
-| ecc    | string | no       | M        | L, M, Q, H                |
-| margin | int    | no       | 4        | 0–100                     |
-| fg     | string | no       | #000000  | hex color                 |
-| bg     | string | no       | #FFFFFF  | hex color                 |
+
+| Param  | Type   | Required | Default  | Limits                           |
+|--------|--------|----------|----------|----------------------------------|
+| data   | string | yes      | —        | 1–4096 chars                     |
+| format | string | no       | png      | png, svg                         |
+| size   | int    | no       | 400      | 80–4096                          |
+| ecc    | string | no       | M        | L, M, Q, H                       |
+| margin | int    | no       | 4        | 0–100                            |
+| fg     | string | no       | #000000  | hex color                        |
+| bg     | string | no       | #FFFFFF  | hex color                        |
 | logo   | string | no       | —        | http/https URL, auto-bumps ecc→H |
 
 ### `POST /batch`
+
 ```json
 { "items": [{"id":"a","data":"..."}], "format":"png", "size":400, "ecc":"M", "fg":"#000", "bg":"#FFF", "logo":"https://..." }
 ```
+
 → ZIP of `{id}.png|svg` files. Max 200 items.
 
-## Next Steps / Post-v1 Territory
+## Post-v1 ideas (not started; ask before picking one up)
 
-- **API → Web UI bridge.** Let the `src/` frontend call `/qr` as a fallback generator when `qr-code-styling` can't handle a payload (e.g. very long URLs pushing version limits on canvas).
-- **QR style API.** Expose dot style, corner shape, gradient params in the API — currently static square modules only (segno). Consider using `qrcode` + `qrcode-artistic` for styled server-side output.
-- **Batch from CSV.** Accept `multipart/form-data` with a CSV file → ZIP download (common b2b use case: restaurant menus, event badges).
-- **API key / rate limiting.** Before going public: simple token auth + per-IP rate limiter (Starlette middleware or nginx).
-- **Cache layer.** Identical `(data, ecc, size, fg, bg, logo)` combos hit often — Redis or in-memory LRU cuts segno render time in half.
-- **Web UI tests.** Vitest for `lib/formatters.ts`, Playwright for the preview/download flow.
-- **API tests.** pytest + httpx for all endpoints, logo compositing edge cases.
-- **More content types in API.** Encoders for WiFi, vCard, geo, SMS (port formatters.ts logic to Python).
-- **Deploy API to qr.donotpanic.space.** Set up nginx/Caddy reverse proxy with Let's Encrypt on a free-tier Oracle/AWS VM.
+- Web UI calls `/qr` as a fallback when `qr-code-styling` cannot handle a payload.
+- Styled server-side output (dot style, corners, gradients) in the API.
+- Batch from CSV upload → ZIP.
+- API key + per-IP rate limiting before the API goes public.
+- LRU/Redis cache for repeated `(data, ecc, size, fg, bg, logo)` requests.
+- Wi-Fi / vCard / geo / SMS encoders in the API (port of `formatters.ts`).
