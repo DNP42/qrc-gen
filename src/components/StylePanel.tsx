@@ -7,6 +7,8 @@ import type {
   Overlay,
   QRConfig,
 } from '@/lib/qr';
+import { useDict } from '@/i18n/I18nProvider';
+import type { Dictionary } from '@/i18n/dictionaries/en';
 
 interface Props {
   config: QRConfig;
@@ -17,27 +19,30 @@ const DOT_STYLES: DotStyle[] = ['rounded', 'square', 'dots', 'classy', 'classy-r
 const CORNER_SQUARE: CornerSquareStyle[] = ['extra-rounded', 'square', 'dot'];
 const CORNER_DOT: CornerDotStyle[] = ['dot', 'square'];
 
-const PRESETS: Array<{ name: string; fg: string; bg: string }> = [
-  { name: 'hawk', fg: '#39FF7A', bg: '#0A0A0A' },
-  { name: 'mono', fg: '#EDEDED', bg: '#0A0A0A' },
-  { name: 'inverted', fg: '#0A0A0A', bg: '#EDEDED' },
-  { name: 'cyan', fg: '#00E5FF', bg: '#0A0A0A' },
-  { name: 'amber', fg: '#FFB400', bg: '#0A0A0A' },
-  { name: 'blood', fg: '#FF4D6D', bg: '#0A0A0A' },
+type PresetId = keyof Dictionary['style']['presets'];
+
+const PRESETS: Array<{ id: PresetId; fg: string; bg: string }> = [
+  { id: 'hawk', fg: '#39FF7A', bg: '#0A0A0A' },
+  { id: 'mono', fg: '#EDEDED', bg: '#0A0A0A' },
+  { id: 'inverted', fg: '#0A0A0A', bg: '#EDEDED' },
+  { id: 'cyan', fg: '#00E5FF', bg: '#0A0A0A' },
+  { id: 'amber', fg: '#FFB400', bg: '#0A0A0A' },
+  { id: 'blood', fg: '#FF4D6D', bg: '#0A0A0A' },
 ];
 
 export function StylePanel({ config, onChange }: Props) {
+  const t = useDict().style;
   const update = (patch: Partial<QRConfig>) => onChange({ ...config, ...patch });
 
   return (
     <div className="space-y-5">
-      <Section title="Color preset">
+      <Section title={t.preset}>
         <div className="grid grid-cols-3 gap-2">
           {PRESETS.map((p) => {
             const active = config.fgColor === p.fg && config.bgColor === p.bg;
             return (
               <button
-                key={p.name}
+                key={p.id}
                 type="button"
                 onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md border font-mono text-xs uppercase tracking-wider transition ${
@@ -54,50 +59,53 @@ export function StylePanel({ config, onChange }: Props) {
                   className="w-3 h-3 rounded-sm border border-[var(--border-hot)]"
                   style={{ background: p.fg }}
                 />
-                {p.name}
+                {t.presets[p.id]}
               </button>
             );
           })}
         </div>
         <div className="grid grid-cols-2 gap-3 mt-3">
           <ColorPick
-            label="Foreground"
+            label={t.foreground}
             value={config.fgColor}
             onChange={(fgColor) => update({ fgColor })}
           />
           <ColorPick
-            label="Background"
+            label={t.background}
             value={config.bgColor}
             onChange={(bgColor) => update({ bgColor })}
           />
         </div>
       </Section>
 
-      <Section title="Dot style">
+      <Section title={t.dotStyle}>
         <Pills
           options={DOT_STYLES}
+          labels={t.dotStyles}
           value={config.dotStyle}
           onChange={(dotStyle) => update({ dotStyle })}
         />
       </Section>
 
-      <Section title="Corner squares">
+      <Section title={t.cornerSquares}>
         <Pills
           options={CORNER_SQUARE}
+          labels={t.cornerSquareStyles}
           value={config.cornerSquareStyle}
           onChange={(cornerSquareStyle) => update({ cornerSquareStyle })}
         />
       </Section>
 
-      <Section title="Corner dots">
+      <Section title={t.cornerDots}>
         <Pills
           options={CORNER_DOT}
+          labels={t.cornerDotStyles}
           value={config.cornerDotStyle}
           onChange={(cornerDotStyle) => update({ cornerDotStyle })}
         />
       </Section>
 
-      <Section title="Overlay (optional)">
+      <Section title={t.overlay}>
         <OverlayControls overlay={config.overlay} onChange={(overlay) => update({ overlay })} />
       </Section>
     </div>
@@ -115,10 +123,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Pills<T extends string>({
   options,
+  labels,
   value,
   onChange,
 }: {
   options: T[];
+  labels: Record<T, string>;
   value: T;
   onChange: (v: T) => void;
 }) {
@@ -135,7 +145,7 @@ function Pills<T extends string>({
               : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
           }`}
         >
-          {opt}
+          {labels[opt]}
         </button>
       ))}
     </div>
@@ -181,6 +191,7 @@ function OverlayControls({
   overlay: Overlay;
   onChange: (o: Overlay) => void;
 }) {
+  const t = useDict().style;
   const kind = overlay.kind;
 
   const handleFile = async (file: File) => {
@@ -210,27 +221,32 @@ function OverlayControls({
                 : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
             }`}
           >
-            {k}
+            {t.overlayKinds[k]}
           </button>
         ))}
       </div>
 
       {kind === 'image' && (
         <div className="space-y-2">
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/svg+xml,image/webp"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-            }}
-            className="field font-sans cursor-pointer"
-          />
+          {/* Own button: the native file input's text follows the browser's
+              language, not the page's. */}
+          <label className="field block font-sans cursor-pointer">
+            {t.chooseImage}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFile(f);
+              }}
+              className="sr-only"
+            />
+          </label>
           {overlay.kind === 'image' && overlay.src && (
             <div className="flex items-center gap-3">
               <img
                 src={overlay.src}
-                alt="overlay preview"
+                alt={t.overlayPreviewAlt}
                 className="w-12 h-12 rounded-md border border-[var(--border)] object-contain bg-white p-1"
               />
               <button
@@ -238,7 +254,7 @@ function OverlayControls({
                 onClick={() => onChange({ kind: 'image', src: '' })}
                 className="font-mono text-xs text-[var(--danger)] hover:underline"
               >
-                clear
+                {t.clear}
               </button>
             </div>
           )}
@@ -253,18 +269,14 @@ function OverlayControls({
             value={overlay.text}
             onChange={(e) => onChange({ kind: 'text', text: e.target.value })}
             className="field"
-            placeholder="hi (max 6 chars)"
+            placeholder={t.textPlaceholder}
           />
-          <p className="mt-1 font-mono text-xs text-[var(--muted)]">
-            Drawn over the QR center. Error correction auto-bumps to H.
-          </p>
+          <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.textHint}</p>
         </div>
       )}
 
       {kind === 'none' && (
-        <p className="font-mono text-xs text-[var(--muted)]">
-          Plain QR. Densest encoding, scans fastest.
-        </p>
+        <p className="font-mono text-xs text-[var(--muted)]">{t.noneHint}</p>
       )}
     </div>
   );
