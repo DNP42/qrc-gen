@@ -12,7 +12,7 @@ PNG and SVG export, all client-side.
 - **3 content types** — URL/text, Wi-Fi network (WPA / WEP / open), vCard contact
 - **Optional center overlay** — image upload (logo) or short text (1–6 chars)
 - **Auto error-correction bump** — switches to level H whenever an overlay is on, so the QR stays scannable through ~30% occlusion
-- **Style controls** — foreground/background colors, six color presets, six dot styles, three corner-square styles, two corner-dot styles
+- **Style controls** — foreground/background colors, six color presets, six dot styles, three corner-square styles, two corner-dot styles, quiet-zone padding
 - **PNG + SVG export** — vector output is a first-class citizen
 - **English + Slovenian** — `/en` and `/sl`, statically built; `/` picks one from the browser language
 - **Zero backend** — no API routes, no database, no telemetry. Everything runs in the browser.
@@ -61,7 +61,7 @@ src/
     Generator.tsx     → the single page (state + composition)
     LanguageSwitch.tsx → EN | SL links
     ContentTabs.tsx   → URL / Wi-Fi / vCard inputs
-    StylePanel.tsx    → colors, dot styles, overlay controls
+    StylePanel.tsx    → colors, dot styles, padding, overlay controls
     QRPreview.tsx     → mounts qr-code-styling, redraws on config change
     DownloadBar.tsx   → PNG + SVG download
   i18n/               → EN/SL dictionaries, locale config, plural helper

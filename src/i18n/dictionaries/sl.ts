@@ -87,6 +87,9 @@ export const sl: Dictionary = {
     dotStyle: 'Oblika pik',
     cornerSquares: 'Kotni kvadrati',
     cornerDots: 'Kotne pike',
+    padding: 'Odmik',
+    paddingHint: 'Tiha cona okoli kode. Pretesno, pa telefon obupa.',
+    paddingValue: '{n} px',
     overlay: 'Prekrivni sloj (neobvezno)',
     presets: {
       hawk: 'hawk',

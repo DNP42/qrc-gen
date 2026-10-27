@@ -94,6 +94,9 @@ export const en = {
     dotStyle: 'Dot style',
     cornerSquares: 'Corner squares',
     cornerDots: 'Corner dots',
+    padding: 'Padding',
+    paddingHint: 'Quiet zone around the code. Starve it and phones give up.',
+    paddingValue: '{n} px',
     overlay: 'Overlay (optional)',
     presets: {
       hawk: 'hawk',

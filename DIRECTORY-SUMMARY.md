@@ -14,7 +14,7 @@ Two deployable artifacts sharing one git repo:
 ## Web UI (`src/`)
 - Client-side QR generator at `qr.donotpanic.space`
 - 3 content types: URL/Text, WiFi, vCard
-- Style controls: colors, dot shapes, corner styles, logo/text overlay
+- Style controls: colors, dot shapes, corner styles, quiet-zone padding, logo/text overlay
 - Auto error-correction bump (M → H) when overlay is on
 - PNG + SVG download
 - English + Slovenian UI at `/en` and `/sl`; `/` redirects by browser language

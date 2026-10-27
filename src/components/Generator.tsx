@@ -118,7 +118,7 @@ function PreviewLoading() {
   const t = useDict();
   return (
     <div
-      className="rounded-lg border border-[var(--border)] flex items-center justify-center font-mono text-xs text-[var(--muted)]"
+      className="box-content rounded-lg border border-[var(--hawk-dim)] flex items-center justify-center font-mono text-xs text-[var(--muted)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
       style={{ width: 320, height: 320 }}
     >
       {t.preview.loading}
