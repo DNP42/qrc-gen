@@ -17,6 +17,7 @@ Two deployable artifacts sharing one git repo:
 - Style controls: colors, dot shapes, corner styles, logo/text overlay
 - Auto error-correction bump (M → H) when overlay is on
 - PNG + SVG download
+- English + Slovenian UI at `/en` and `/sl`; `/` redirects by browser language
 - **Start:** `npm run dev` → `localhost:3000`
 
 ## API (`api/`)
