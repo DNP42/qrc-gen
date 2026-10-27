@@ -12,6 +12,7 @@ import {
 } from '@/lib/formatters';
 import { useDict, useLocale } from '@/i18n/I18nProvider';
 import { plural } from '@/i18n/format';
+import { DEFAULT_CONFIG } from '@/lib/qr';
 
 export type ContentType = 'url' | 'wifi' | 'vcard';
 
@@ -56,7 +57,7 @@ export function ContentTabs({ onChange }: Props) {
 function UrlForm({ onChange }: { onChange: (s: string) => void }) {
   const t = useDict().content.url;
   const locale = useLocale();
-  const [input, setInput] = useState<UrlInput>({ text: 'https://qr.donotpanic.space' });
+  const [input, setInput] = useState<UrlInput>({ text: DEFAULT_CONFIG.data });
 
   const update = (next: UrlInput) => {
     setInput(next);

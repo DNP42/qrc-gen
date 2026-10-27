@@ -12,7 +12,7 @@ Two deployable artifacts sharing one git repo:
 | 2 | **API** | Docker microservice | Python 3.12 + FastAPI + segno + Pillow | v1 done, not deployed |
 
 ## Web UI (`src/`)
-- Client-side QR generator at `qrc-gen.vercel.app`
+- Client-side QR generator at `qr.donotpanic.space`
 - 3 content types: URL/Text, WiFi, vCard
 - Style controls: colors, dot shapes, corner styles, logo/text overlay
 - Auto error-correction bump (M → H) when overlay is on

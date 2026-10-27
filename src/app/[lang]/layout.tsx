@@ -6,11 +6,11 @@ import { geistMono, geistSans } from "../fonts";
 import "../globals.css";
 
 // Absolute base for canonical, hreflang and OG URLs. Vercel sets the
-// production domain at build time; the fallback is the current production URL.
+// production domain at build time; local and other builds use the public site.
 const siteUrl = new URL(
   process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "https://qrc-gen.vercel.app",
+    : "https://qr.donotpanic.space",
 );
 
 // Only /en and /sl exist; any other first segment is a 404.
