@@ -48,16 +48,13 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
   }));
 
   return (
-    <div className="flex flex-col items-center">
-      {/* box-content: the canvas is exactly config.size. A border-box of that
-          width would shrink the content box by the stroke, and overflow-hidden
-          would clip the canvas over the border. hawk-dim reads on the dark card;
-          --border (#1f1f1f) does not. */}
-      <div
-        ref={containerRef}
-        className="box-content flex items-center justify-center rounded-lg overflow-hidden border border-[var(--hawk-dim)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
-        style={{ width: config.size, height: config.size, background: config.bgColor }}
-      />
-    </div>
+    // Border lives inside the width (border-box) and the canvas fills that
+    // content box. A content-box of config.size plus the stroke made the card
+    // wider than the page, so the right edge ran off the screen.
+    <div
+      ref={containerRef}
+      className="qr-frame mx-auto box-border aspect-square min-w-0 max-w-full overflow-hidden rounded-lg border border-[var(--hawk-dim)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
+      style={{ width: config.size, background: config.bgColor }}
+    />
   );
 });

@@ -120,6 +120,15 @@ body {
 }
 .btn-ghost:hover { border-color: var(--border-hot); background: var(--surface-2); }
 
+/* The bitmap stays at config.size. CSS scales it into the frame so a fixed
+   canvas cannot push the preview card past the right edge of the page. */
+.qr-frame canvas,
+.qr-frame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* Quiet-zone slider. Native range widgets look like a form from another site.
    WebKit clips the thumb to the input border box, so the input is as tall as
    the 14px handle. The painted line stays 2px, drawn as a track (Safari drops
