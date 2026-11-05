@@ -16,6 +16,7 @@ PNG and SVG export, all client-side.
 - **PNG + SVG export** — vector output is a first-class citizen
 - **English + Slovenian** — `/en` and `/sl`, statically built; `/` picks one from the browser language
 - **Zero backend** — no API routes, no database, no telemetry. Everything runs in the browser.
+- **Sales pages** — `/[lang]/vizitka`, `/[lang]/autopilot` and `/[lang]/cenik` for Ekipa DNP offers. Orders are `mailto:` links; prices, contact e-mail, phone and VAT note live in `src/config/offers.ts`.
 
 ## Stack
 

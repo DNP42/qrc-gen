@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';
 import { localeNames, locales } from '@/i18n/config';
 import { useDict, useLocale } from '@/i18n/I18nProvider';
@@ -12,6 +13,8 @@ import { useDict, useLocale } from '@/i18n/I18nProvider';
 export function LanguageSwitch() {
   const t = useDict();
   const current = useLocale();
+  // Keep the page when switching: /sl/cenik ⇄ /en/cenik.
+  const subpath = usePathname().replace(/^\/[^/]+/, '');
 
   return (
     <nav aria-label={t.header.language} className="flex items-center gap-1.5 font-mono text-xs">
@@ -23,7 +26,7 @@ export function LanguageSwitch() {
             </span>
           )}
           <Link
-            href={`/${locale}`}
+            href={`/${locale}${subpath}`}
             hrefLang={locale}
             lang={locale}
             title={localeNames[locale]}
@@ -31,7 +34,7 @@ export function LanguageSwitch() {
             className={`uppercase tracking-wider transition-colors ${
               locale === current
                 ? 'text-[var(--hawk)]'
-                : 'text-[var(--muted)] hover:text-white'
+                : 'text-[var(--muted-strong)] hover:text-white'
             }`}
           >
             {locale}

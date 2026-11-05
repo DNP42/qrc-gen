@@ -8,6 +8,9 @@
   --border: #1f1f1f;
   --border-hot: #2a2a2a;
   --muted: #6b6b6b;
+  /* #6b6b6b is about 3.6:1 on the background, under WCAG AA for text.
+     Text on the shared header, footer and sales pages uses --muted-strong (~7:1). */
+  --muted-strong: #a3a3a3;
   --hawk: #39ff7a;
   --hawk-dim: #1f8f3f;
   --danger: #ff4d6d;
@@ -21,6 +24,7 @@
   --color-border: var(--border);
   --color-border-hot: var(--border-hot);
   --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
   --color-hawk: var(--hawk);
   --color-hawk-dim: var(--hawk-dim);
   --color-danger: var(--danger);

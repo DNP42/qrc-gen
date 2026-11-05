@@ -5,7 +5,8 @@ import { useRef, useState } from 'react';
 import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
 import { DownloadBar } from '@/components/DownloadBar';
-import { LanguageSwitch } from '@/components/LanguageSwitch';
+import { SiteFooter } from '@/components/SiteFooter';
+import { SiteHeader } from '@/components/SiteHeader';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
@@ -33,29 +34,7 @@ export function Generator() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="font-mono text-lg text-[var(--hawk)] hawk-glow scanline">
-              qrc-gen
-            </h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mt-1">
-              {t.header.tagline}
-            </p>
-          </div>
-          <div className="flex items-center gap-5">
-            <LanguageSwitch />
-            <a
-              href="https://github.com/hrco/qrc-gen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs text-[var(--muted)] hover:text-[var(--hawk)] transition-colors"
-            >
-              {t.header.github}
-            </a>
-          </div>
-        </div>
-      </header>
+      <SiteHeader isHome />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10">
         <div className="mb-10">
@@ -91,25 +70,7 @@ export function Generator() {
         </div>
       </main>
 
-      <footer className="border-t border-[var(--border)] mt-10">
-        <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
-          <span>
-            {t.footer.builtBy}{' '}
-            <span className="text-[var(--hawk)]">SpectreHawk</span>
-          </span>
-          <span>
-            {t.footer.poweredBy}{' '}
-            <a
-              href="https://github.com/kozakdenys/qr-code-styling"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[var(--hawk)] transition-colors"
-            >
-              qr-code-styling
-            </a>
-          </span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
