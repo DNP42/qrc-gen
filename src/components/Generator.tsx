@@ -68,8 +68,8 @@ export function Generator() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_auto] gap-10">
-          <div className="space-y-8">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,max-content)]">
+          <div className="min-w-0 space-y-8">
             <Card title={t.cards.content}>
               <ContentTabs onChange={handleContent} />
             </Card>
@@ -79,7 +79,7 @@ export function Generator() {
             </Card>
           </div>
 
-          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <div className="min-w-0 w-full space-y-6 lg:sticky lg:top-6 lg:self-start">
             <Card title={t.cards.preview}>
               <QRPreview config={config} ref={previewRef} />
             </Card>
@@ -118,8 +118,8 @@ function PreviewLoading() {
   const t = useDict();
   return (
     <div
-      className="box-content rounded-lg border border-[var(--hawk-dim)] flex items-center justify-center font-mono text-xs text-[var(--muted)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
-      style={{ width: 320, height: 320 }}
+      className="mx-auto box-border flex aspect-square min-w-0 max-w-full items-center justify-center rounded-lg border border-[var(--hawk-dim)] font-mono text-xs text-[var(--muted)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
+      style={{ width: DEFAULT_CONFIG.size }}
     >
       {t.preview.loading}
     </div>
@@ -128,7 +128,7 @@ function PreviewLoading() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+    <section className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
       <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
         {title}
       </h3>
