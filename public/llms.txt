@@ -1,0 +1,15 @@
+# qrc-gen
+
+> Free QR code generator at https://qr.donotpanic.space. No accounts, no tracking. Runs fully in the browser.
+
+## Pages
+- [English](https://qr.donotpanic.space/en): generator UI in English
+- [Slovenščina](https://qr.donotpanic.space/sl): generator UI in Slovenian
+
+## Features
+- Content types: URL or text, Wi-Fi network, vCard contact
+- Styles: colors, dot shapes, corner styles, quiet-zone padding, logo or text overlay
+- Downloads: PNG and SVG
+
+## Source
+- [GitHub: DNP42/qrc-gen](https://github.com/DNP42/qrc-gen)
