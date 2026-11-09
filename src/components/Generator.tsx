@@ -108,6 +108,14 @@ export function Generator() {
               qr-code-styling
             </a>
           </span>
+          <a
+            href="https://ko-fi.com/smokrates"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-[var(--hawk)] text-[var(--hawk)] px-3 py-1 hover:bg-[var(--hawk)] hover:text-black transition-colors"
+          >
+            {t.footer.kofi}
+          </a>
         </div>
       </footer>
     </div>
