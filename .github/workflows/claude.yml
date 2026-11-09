@@ -37,6 +37,12 @@ jobs:
         with:
           app-id: ${{ vars.DNPCLAUDE_APP_ID }}
           private-key: ${{ secrets.DNPCLAUDE_PRIVATE_KEY }}
+          # The app holds wide org permissions; each run gets only these, on this repo only.
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+          permission-actions: read
 
       - name: Run Claude Code
         id: claude
