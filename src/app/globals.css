@@ -1,92 +1,160 @@
 @import "tailwindcss";
 
+/* Tokens follow DNP42/design-studio foundations (colour, type, motion).
+   Light is the default; dark follows the system. Brand = the hawk green.
+   Check: python3 ~/AirLab/_design-studio/foundations/colour/check-contrast.py src/app/globals.css */
+/* @theme light */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --surface: #111111;
-  --surface-2: #161616;
-  --border: #1f1f1f;
-  --border-hot: #2a2a2a;
-  --muted: #6b6b6b;
-  --hawk: #39ff7a;
-  --hawk-dim: #1f8f3f;
-  --danger: #ff4d6d;
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f4;
+  --color-text: #1c1917;
+  --color-text-muted: #57534e;
+  --color-accent: #15803d;
+  --color-on-accent: #ffffff;
+  --color-border: #78716c;
+  --color-focus: #15803d;
+  --color-danger: #b91c1c;
+  --color-success: #15803d;
+
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 200ms;
+  --motion-duration-slow: 300ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-enter: cubic-bezier(0, 0, 0, 1);
+  --motion-distance-md: 8px;
+
+  --leading-body: 1.6;
+  --leading-heading: 1.25;
+
+  /* Names used by the components */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --surface: var(--color-surface);
+  --border: var(--color-border);
+  --border-hot: var(--color-border);
+  --muted: var(--color-text-muted);
+  --hawk: var(--color-accent);
+  --hawk-dim: var(--color-accent);
+  --danger: var(--color-danger);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-border: var(--border);
-  --color-border-hot: var(--border-hot);
-  --color-muted: var(--muted);
-  --color-hawk: var(--hawk);
-  --color-hawk-dim: var(--hawk-dim);
-  --color-danger: var(--danger);
+/* @theme dark */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #0a0a0a;
+    --color-surface: #161616;
+    --color-text: #ededed;
+    --color-text-muted: #c8c8c8;
+    --color-accent: #39ff7a;
+    --color-on-accent: #04130a;
+    --color-border: #8a8a8a;
+    --color-focus: #39ff7a;
+    --color-danger: #ff8fa3;
+    --color-success: #39ff7a;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-base: 150ms;
+    --motion-duration-slow: 150ms;
+    --motion-distance-md: 0px;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* Tailwind text sizes snap to the design-studio type scale (--text-*): nothing under 18px. */
+@theme {
+  --text-xs: 1.125rem;
+  --text-xs--line-height: 1.6;
+  --text-sm: 1.125rem;
+  --text-sm--line-height: 1.6;
+  --text-base: 1.25rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.5rem;
+  --text-lg--line-height: 1.25;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 3rem;
+  --text-4xl--line-height: 1.25;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html, body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 body {
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-image:
-    radial-gradient(circle at 20% 0%, rgba(57, 255, 122, 0.08), transparent 40%),
-    radial-gradient(circle at 80% 100%, rgba(57, 255, 122, 0.05), transparent 50%);
-  background-attachment: fixed;
+  font-family: var(--font-sans), system-ui, Arial, Helvetica, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
 }
 
-/* Glow utility for the accent text — used sparingly */
-.hawk-glow {
-  text-shadow:
-    0 0 6px rgba(57, 255, 122, 0.6),
-    0 0 18px rgba(57, 255, 122, 0.25);
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
-/* Animated underline for the brand wordmark */
+/* Brand wordmark: a slow fade, opacity only. */
 @keyframes scanline {
-  0%, 100% { opacity: 0.55; }
+  0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
 }
 .scanline {
   animation: scanline 2.4s ease-in-out infinite;
 }
+@media (prefers-reduced-motion: reduce) {
+  .scanline { animation: none; }
+}
+
+/* Cards enter with a fade and a short rise (transform + opacity only). */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(var(--motion-distance-md)); }
+  to { opacity: 1; transform: none; }
+}
+.rise-in {
+  animation: rise-in var(--motion-duration-slow) var(--motion-ease-enter) both;
+}
+
+/* Flat QR frame: drop the inline glow from QRPreview's wrapper. */
+.qr-frame {
+  box-shadow: none !important;
+  border-color: var(--color-border) !important;
+}
 
 /* Form inputs share one look */
 .field {
   width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  min-height: 2.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  padding: 0.625rem 0.75rem;
-  color: var(--foreground);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.875rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  font-size: var(--text-base);
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 /* :focus-within also lights up a .field that wraps a visually hidden input,
    such as the image picker's <label>. */
 .field:focus,
 .field:focus-within {
-  outline: none;
-  border-color: var(--hawk-dim);
-  box-shadow: 0 0 0 3px rgba(57, 255, 122, 0.15);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-color: var(--color-focus);
 }
 .field::placeholder {
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .label {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
   margin-bottom: 0.375rem;
   display: block;
 }
@@ -96,29 +164,60 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
   border-radius: 0.5rem;
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 1rem;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.8125rem;
+  font-size: var(--text-base);
   font-weight: 600;
-  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: transform 0.05s, background 0.15s, border-color 0.15s;
+  transition:
+    transform var(--motion-duration-fast) var(--motion-ease-standard),
+    opacity var(--motion-duration-fast) var(--motion-ease-standard);
   border: 1px solid transparent;
   user-select: none;
 }
+.btn:hover { transform: translateY(-1px); }
 .btn:active { transform: translateY(1px); }
 .btn-primary {
-  background: var(--hawk);
-  color: #000;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
-.btn-primary:hover { background: #51ff8c; }
+.btn-primary:hover { opacity: 0.9; }
 .btn-ghost {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--foreground);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
-.btn-ghost:hover { border-color: var(--border-hot); background: var(--surface-2); }
+.btn-ghost:hover { opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover, .btn:active { transform: none; }
+}
+
+/* Choice buttons (tabs, presets, styles): one 44px target, state by border and weight. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-standard);
+}
+.chip:hover { color: var(--color-text); }
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+  color: var(--color-text);
+  font-weight: 700;
+}
 
 /* The bitmap stays at config.size. CSS scales it into the frame so a fixed
    canvas cannot push the preview card past the right edge of the page. */
@@ -137,53 +236,51 @@ body {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 14px;
+  height: 24px;
   margin: 0;
   background: transparent;
   cursor: pointer;
 }
 .range::-webkit-slider-runnable-track {
-  height: 14px;
+  height: 24px;
   border: none;
   background: linear-gradient(
-    transparent 0 6px,
-    var(--border-hot) 6px 8px,
-    transparent 8px 14px
+    transparent 0 10px,
+    var(--color-border) 10px 14px,
+    transparent 14px 24px
   );
 }
 .range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
   margin-top: 0;
   border: none;
   border-radius: 999px;
-  background: var(--hawk);
-  box-shadow: 0 0 10px rgba(57, 255, 122, 0.55);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-bg);
   cursor: pointer;
 }
 .range::-moz-range-track {
-  height: 2px;
-  background: var(--border-hot);
+  height: 4px;
+  background: var(--color-border);
   border: none;
   border-radius: 999px;
 }
 .range::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
   border: none;
   border-radius: 999px;
-  background: var(--hawk);
-  box-shadow: 0 0 10px rgba(57, 255, 122, 0.55);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-bg);
   cursor: pointer;
 }
+
+
+
 .range:focus-visible {
-  outline: none;
-}
-.range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(57, 255, 122, 0.25), 0 0 10px rgba(57, 255, 122, 0.55);
-}
-.range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 3px rgba(57, 255, 122, 0.25), 0 0 10px rgba(57, 255, 122, 0.55);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }

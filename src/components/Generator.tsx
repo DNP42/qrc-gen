@@ -6,6 +6,7 @@ import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
 import { DownloadBar } from '@/components/DownloadBar';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
+import { SoundToggle } from '@/components/SoundToggle';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
@@ -34,22 +35,23 @@ export function Generator() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-wrap gap-3 items-center justify-between">
           <div>
-            <h1 className="font-mono text-lg text-[var(--hawk)] hawk-glow scanline">
+            <h1 className="font-mono text-lg font-bold text-[var(--hawk)] scanline">
               qrc-gen
             </h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mt-1">
+            <p className="font-mono text-sm text-[var(--muted)]">
               {t.header.tagline}
             </p>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <LanguageSwitch />
+            <SoundToggle />
             <a
               href="https://github.com/hrco/qrc-gen"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-xs text-[var(--muted)] hover:text-[var(--hawk)] transition-colors"
+              className="inline-flex min-h-11 items-center font-mono text-sm text-[var(--muted)] underline underline-offset-4 hover:text-[var(--foreground)]"
             >
               {t.header.github}
             </a>
@@ -63,7 +65,7 @@ export function Generator() {
             {t.hero.title}{' '}
             <span className="text-[var(--muted)]">{t.hero.titleMuted}</span>
           </h2>
-          <p className="mt-3 font-mono text-sm text-[var(--muted)] max-w-2xl">
+          <p className="mt-3 font-mono text-base text-[var(--muted)] max-w-[65ch]">
             {t.hero.intro}
           </p>
         </div>
@@ -92,10 +94,10 @@ export function Generator() {
       </main>
 
       <footer className="border-t border-[var(--border)] mt-10">
-        <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-sm text-[var(--muted)] flex flex-wrap gap-4 items-center justify-between">
           <span>
             {t.footer.builtBy}{' '}
-            <span className="text-[var(--hawk)]">SpectreHawk</span>
+            <span className="font-semibold text-[var(--foreground)]">SpectreHawk</span>
           </span>
           <span>
             {t.footer.poweredBy}{' '}
@@ -103,7 +105,7 @@ export function Generator() {
               href="https://github.com/kozakdenys/qr-code-styling"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[var(--hawk)] transition-colors"
+              className="underline underline-offset-4 hover:text-[var(--foreground)]"
             >
               qr-code-styling
             </a>
@@ -112,7 +114,7 @@ export function Generator() {
             href="https://ko-fi.com/smokrates"
             target="_blank"
             rel="noopener noreferrer"
-            className="border border-[var(--hawk)] text-[var(--hawk)] px-3 py-1 hover:bg-[var(--hawk)] hover:text-black transition-colors"
+            className="btn btn-ghost"
           >
             {t.footer.kofi}
           </a>
@@ -126,7 +128,7 @@ function PreviewLoading() {
   const t = useDict();
   return (
     <div
-      className="mx-auto box-border flex aspect-square min-w-0 max-w-full items-center justify-center rounded-lg border border-[var(--hawk-dim)] font-mono text-xs text-[var(--muted)] shadow-[0_0_28px_rgba(57,255,122,0.16)]"
+      className="mx-auto box-border flex aspect-square min-w-0 max-w-full items-center justify-center rounded-lg border border-[var(--border)] font-mono text-sm text-[var(--muted)]"
       style={{ width: DEFAULT_CONFIG.size }}
     >
       {t.preview.loading}
@@ -136,8 +138,8 @@ function PreviewLoading() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
+    <section className="rise-in min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+      <h3 className="font-mono text-base font-semibold text-[var(--foreground)] mb-4">
         {title}
       </h3>
       {children}

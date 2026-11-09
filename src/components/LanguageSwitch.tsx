@@ -14,7 +14,7 @@ export function LanguageSwitch() {
   const current = useLocale();
 
   return (
-    <nav aria-label={t.header.language} className="flex items-center gap-1.5 font-mono text-xs">
+    <nav aria-label={t.header.language} className="flex items-center gap-1 font-mono text-sm">
       {locales.map((locale, i) => (
         <Fragment key={locale}>
           {i > 0 && (
@@ -28,10 +28,10 @@ export function LanguageSwitch() {
             lang={locale}
             title={localeNames[locale]}
             aria-current={locale === current ? 'page' : undefined}
-            className={`uppercase tracking-wider transition-colors ${
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center uppercase underline-offset-4 ${
               locale === current
-                ? 'text-[var(--hawk)]'
-                : 'text-[var(--muted)] hover:text-white'
+                ? 'font-bold underline text-[var(--foreground)]'
+                : 'text-[var(--muted)] hover:text-[var(--foreground)]'
             }`}
           >
             {locale}

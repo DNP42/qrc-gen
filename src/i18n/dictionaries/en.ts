@@ -40,6 +40,10 @@ export const en = {
   preview: {
     loading: 'booting matrix…',
   },
+  sound: {
+    on: 'Sound: on',
+    off: 'Sound: off',
+  },
   footer: {
     builtBy: 'built in the void · open source · vibe by',
     poweredBy: 'powered by',
@@ -140,6 +144,7 @@ export const en = {
     filename: 'Filename',
     png: 'Download PNG',
     svg: 'Download SVG',
+    done: 'Downloaded {name}.{ext}',
     // ASCII only: the download sanitizer replaces anything else with '-'.
     defaultNames: {
       url: 'qrcode',

@@ -30,6 +30,10 @@ export const sl: Dictionary = {
   preview: {
     loading: 'zaganjam matrico…',
   },
+  sound: {
+    on: 'Zvok: vklopljen',
+    off: 'Zvok: izklopljen',
+  },
   footer: {
     builtBy: 'zgrajeno v praznini · odprta koda · vajb:',
     poweredBy: 'poganja',
@@ -133,6 +137,7 @@ export const sl: Dictionary = {
     filename: 'Ime datoteke',
     png: 'Prenesi PNG',
     svg: 'Prenesi SVG',
+    done: 'Preneseno: {name}.{ext}',
     defaultNames: {
       url: 'qr-koda',
       wifi: 'wifi-qr',

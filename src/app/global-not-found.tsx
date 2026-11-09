@@ -22,7 +22,7 @@ export default async function GlobalNotFound() {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col items-center justify-center gap-8 px-6 py-16 text-center">
-        <h1 className="font-mono text-6xl text-[var(--hawk)] hawk-glow scanline">{404}</h1>
+        <h1 className="font-mono text-6xl text-[var(--hawk)] scanline">{404}</h1>
         {blocks.map(({ locale, t }) => (
           <section key={locale} lang={locale} className="space-y-2">
             <h2 className="text-xl font-semibold tracking-tight">{t.heading}</h2>

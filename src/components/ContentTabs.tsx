@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import {
   encodeUrl,
   encodeVCard,
@@ -30,16 +30,13 @@ export function ContentTabs({ onChange }: Props) {
 
   return (
     <div>
-      <div className="flex gap-1 mb-4 border-b border-[var(--border)]">
+      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label={t.cards.content}>
         {TABS.map((id) => (
           <button
             key={id}
             onClick={() => setActive(id)}
-            className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border-b-2 transition-colors ${
-              active === id
-                ? 'border-[var(--hawk)] text-[var(--hawk)]'
-                : 'border-transparent text-[var(--muted)] hover:text-white'
-            }`}
+            className="chip"
+            aria-pressed={active === id}
             type="button"
           >
             {t.content.tabs[id]}
@@ -56,6 +53,7 @@ export function ContentTabs({ onChange }: Props) {
 
 function UrlForm({ onChange }: { onChange: (s: string) => void }) {
   const t = useDict().content.url;
+  const id = useId();
   const locale = useLocale();
   const [input, setInput] = useState<UrlInput>({ text: DEFAULT_CONFIG.data });
 
@@ -66,15 +64,16 @@ function UrlForm({ onChange }: { onChange: (s: string) => void }) {
 
   return (
     <div>
-      <label className="label">{t.label}</label>
+      <label className="label" htmlFor={`${id}-url`}>{t.label}</label>
       <textarea
+        id={`${id}-url`}
         className="field"
         rows={4}
         value={input.text}
         onChange={(e) => update({ text: e.target.value })}
         placeholder={t.placeholder}
       />
-      <p className="mt-2 font-mono text-xs text-[var(--muted)]">
+      <p className="mt-2 font-mono text-sm text-[var(--muted)]" aria-live="polite">
         {t.encodedAs} {plural(locale, input.text.length, t.charCount)}.
       </p>
     </div>
@@ -83,6 +82,7 @@ function UrlForm({ onChange }: { onChange: (s: string) => void }) {
 
 function WifiForm({ onChange }: { onChange: (s: string) => void }) {
   const t = useDict().content.wifi;
+  const id = useId();
   const [input, setInput] = useState<WifiInput>({
     ssid: '',
     password: '',
@@ -98,18 +98,20 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="label">{t.ssid}</label>
+        <label className="label" htmlFor={`${id}-ssid`}>{t.ssid}</label>
         <input
+          id={`${id}-ssid`}
           className="field"
           value={input.ssid}
           onChange={(e) => update({ ...input, ssid: e.target.value })}
           placeholder={t.ssidPlaceholder}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="label">{t.encryption}</label>
+          <label className="label" htmlFor={`${id}-enc`}>{t.encryption}</label>
           <select
+            id={`${id}-enc`}
             className="field"
             value={input.encryption}
             onChange={(e) =>
@@ -124,9 +126,11 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
           </select>
         </div>
         <div>
-          <label className="label">{t.hidden}</label>
+          <span className="label" id={`${id}-hid`}>{t.hidden}</span>
           <button
             type="button"
+            aria-labelledby={`${id}-hid`}
+            aria-pressed={input.hidden}
             onClick={() => update({ ...input, hidden: !input.hidden })}
             className={`field text-left ${input.hidden ? 'text-[var(--hawk)]' : ''}`}
           >
@@ -136,8 +140,9 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
       </div>
       {input.encryption !== 'nopass' && (
         <div>
-          <label className="label">{t.password}</label>
+          <label className="label" htmlFor={`${id}-pw`}>{t.password}</label>
           <input
+            id={`${id}-pw`}
             type="text"
             className="field"
             value={input.password}
@@ -152,6 +157,7 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
 
 function VCardForm({ onChange }: { onChange: (s: string) => void }) {
   const t = useDict().content.vcard;
+  const id = useId();
   const [input, setInput] = useState<VCardInput>({
     firstName: '',
     lastName: '',
@@ -169,8 +175,9 @@ function VCardForm({ onChange }: { onChange: (s: string) => void }) {
 
   const field = (key: keyof VCardInput) => (
     <div>
-      <label className="label">{t[key].label}</label>
+      <label className="label" htmlFor={`${id}-${key}`}>{t[key].label}</label>
       <input
+        id={`${id}-${key}`}
         className="field"
         value={input[key]}
         onChange={(e) => update({ ...input, [key]: e.target.value })}
@@ -181,11 +188,11 @@ function VCardForm({ onChange }: { onChange: (s: string) => void }) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {field('firstName')}
         {field('lastName')}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {field('organization')}
         {field('title')}
       </div>

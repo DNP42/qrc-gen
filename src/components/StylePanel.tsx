@@ -41,7 +41,7 @@ export function StylePanel({ config, onChange }: Props) {
   return (
     <div className="space-y-5">
       <Section title={t.preset}>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {PRESETS.map((p) => {
             const active = config.fgColor === p.fg && config.bgColor === p.bg;
             return (
@@ -49,11 +49,8 @@ export function StylePanel({ config, onChange }: Props) {
                 key={p.id}
                 type="button"
                 onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md border font-mono text-xs uppercase tracking-wider transition ${
-                  active
-                    ? 'border-[var(--hawk)] text-[var(--hawk)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
-                }`}
+                className="chip"
+                aria-pressed={active}
               >
                 <span
                   className="w-3 h-3 rounded-sm border border-[var(--border-hot)]"
@@ -121,11 +118,11 @@ export function StylePanel({ config, onChange }: Props) {
             aria-label={t.padding}
             onChange={(e) => update({ margin: clampMargin(Number(e.target.value), config.size) })}
           />
-          <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
+          <span className="font-mono text-sm text-[var(--foreground)] tabular-nums w-20 text-right">
             {interpolate(t.paddingValue, { n: config.margin })}
           </span>
         </div>
-        <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.paddingHint}</p>
+        <p className="mt-1 font-mono text-sm text-[var(--muted)]">{t.paddingHint}</p>
       </Section>
 
       <Section title={t.overlay}>
@@ -162,11 +159,8 @@ function Pills<T extends string>({
           key={opt}
           type="button"
           onClick={() => onChange(opt)}
-          className={`px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider border transition ${
-            value === opt
-              ? 'border-[var(--hawk)] text-[var(--hawk)] bg-[rgba(57,255,122,0.06)]'
-              : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
-          }`}
+          className="chip"
+          aria-pressed={value === opt}
         >
           {labels[opt]}
         </button>
@@ -192,7 +186,7 @@ function ColorPick({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
-          className="w-10 h-10 rounded-md bg-transparent border border-[var(--border)] cursor-pointer"
+          className="w-11 h-11 rounded-md bg-transparent border border-[var(--border)] cursor-pointer"
           aria-label={label}
         />
         <input
@@ -238,11 +232,8 @@ function OverlayControls({
               else if (k === 'image') onChange({ kind: 'image', src: '' });
               else onChange({ kind: 'text', text: '' });
             }}
-            className={`px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider border transition ${
-              kind === k
-                ? 'border-[var(--hawk)] text-[var(--hawk)] bg-[rgba(57,255,122,0.06)]'
-                : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
-            }`}
+            className="chip"
+            aria-pressed={kind === k}
           >
             {t.overlayKinds[k]}
           </button>
@@ -275,7 +266,7 @@ function OverlayControls({
               <button
                 type="button"
                 onClick={() => onChange({ kind: 'image', src: '' })}
-                className="font-mono text-xs text-[var(--danger)] hover:underline"
+                className="min-h-11 px-2 font-mono text-sm text-[var(--danger)] underline"
               >
                 {t.clear}
               </button>
@@ -294,7 +285,7 @@ function OverlayControls({
             className="field"
             placeholder={t.textPlaceholder}
           />
-          <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.textHint}</p>
+          <p className="mt-1 font-mono text-sm text-[var(--muted)]">{t.textHint}</p>
         </div>
       )}
 
