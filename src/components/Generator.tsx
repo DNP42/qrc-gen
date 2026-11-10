@@ -105,11 +105,27 @@ export function Generator() {
               href="https://github.com/kozakdenys/qr-code-styling"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-4 hover:text-[var(--foreground)]"
+              className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--foreground)]"
             >
               qr-code-styling
             </a>
           </span>
+          <a
+            href="https://donotpanic.space"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--foreground)]"
+          >
+            {t.footer.home}
+          </a>
+          <a
+            href="https://github.com/DNP42/qrc-gen"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--foreground)]"
+          >
+            {t.footer.source}
+          </a>
           <a
             href="https://ko-fi.com/smokrates"
             target="_blank"
