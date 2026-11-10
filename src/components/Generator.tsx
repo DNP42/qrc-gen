@@ -109,6 +109,22 @@ export function Generator() {
             </a>
           </span>
           <a
+            href="https://donotpanic.space"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--hawk)] transition-colors"
+          >
+            {t.footer.home}
+          </a>
+          <a
+            href="https://github.com/DNP42/qrc-gen"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--hawk)] transition-colors"
+          >
+            {t.footer.source}
+          </a>
+          <a
             href="https://ko-fi.com/smokrates"
             target="_blank"
             rel="noopener noreferrer"

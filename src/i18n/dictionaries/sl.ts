@@ -33,6 +33,8 @@ export const sl: Dictionary = {
   footer: {
     builtBy: 'zgrajeno v praznini · odprta koda · vajb:',
     poweredBy: 'poganja',
+    home: 'donotpanic.space',
+    source: 'izvorna koda →',
     kofi: '☕ Za vedno zastonj. Častiš kavo?',
   },
   notFound: {
