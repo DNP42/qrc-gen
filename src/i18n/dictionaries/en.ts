@@ -145,7 +145,7 @@ export const en = {
     products: {
       qrStickerPaper: 'QR sticker paper →',
       } satisfies Record<AffiliateProductKey, string>,
-    disclosure: 'affiliate link',
+    disclosure: 'As an Amazon Associate I earn from qualifying purchases.',
   },
   download: {
     filename: 'Filename',

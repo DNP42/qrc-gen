@@ -137,7 +137,7 @@ export const sl: Dictionary = {
     products: {
       qrStickerPaper: 'nalepke za QR kode →',
       },
-    disclosure: 'pridružena povezava',
+    disclosure: 'Kot Amazonov partner zaslužim pri kvalificiranih nakupih.',
   },
   download: {
     filename: 'Ime datoteke',

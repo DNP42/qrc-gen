@@ -3,6 +3,7 @@
 import {
   affiliateProducts,
   amazonUrl,
+  isLive,
 } from '@/config/affiliates';
 import { useDict, useLocale } from '@/i18n/I18nProvider';
 
@@ -14,6 +15,8 @@ export function AffiliateBlock() {
   const t = useDict();
   const locale = useLocale();
   const product = affiliateProducts[0];
+
+  if (!product || !isLive(product, locale)) return null;
 
   return (
     <aside className="max-w-6xl w-full mx-auto px-6 pb-2">
