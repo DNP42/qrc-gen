@@ -33,6 +33,9 @@ export const sl: Dictionary = {
   footer: {
     builtBy: 'zgrajeno v praznini · odprta koda · vajb:',
     poweredBy: 'poganja',
+    home: 'donotpanic.space',
+    source: 'izvorna koda →',
+    kofi: '☕ Za vedno zastonj. Častiš kavo?',
   },
   notFound: {
     heading: 'Signala ni.',
@@ -127,6 +130,14 @@ export const sl: Dictionary = {
     textPlaceholder: 'živjo (do 6 znakov)',
     textHint: 'Narisano čez sredino kode. Popravljanje napak samodejno skoči na H.',
     noneHint: 'Gola QR koda. Najgostejši zapis, najhitrejše skeniranje.',
+  },
+  affiliates: {
+    heading: 'Zabava s QR kodami?',
+    blurb: 'Natiskaj svojo na nalepke ali etikete.',
+    products: {
+      qrStickerPaper: 'nalepke za QR kode →',
+      },
+    disclosure: 'Kot Amazonov partner zaslužim pri kvalificiranih nakupih.',
   },
   download: {
     filename: 'Ime datoteke',

@@ -1,4 +1,5 @@
 import type { ContentType } from '@/components/ContentTabs';
+import type { AffiliateProductKey } from '@/config/affiliates';
 import type { VCardInput, WifiEncryption } from '@/lib/formatters';
 import type { CornerDotStyle, CornerSquareStyle, DotStyle } from '@/lib/qr';
 import type { PluralForms } from '../format';
@@ -43,6 +44,9 @@ export const en = {
   footer: {
     builtBy: 'built in the void · open source · vibe by',
     poweredBy: 'powered by',
+    home: 'donotpanic.space',
+    source: 'source →',
+    kofi: '☕ Free forever. Buy us a coffee',
   },
   // Unknown URLs have no language, so global-not-found.tsx shows every
   // language's block one after the other.
@@ -134,6 +138,14 @@ export const en = {
     textPlaceholder: 'hi (max 6 chars)',
     textHint: 'Drawn over the QR center. Error correction auto-bumps to H.',
     noneHint: 'Plain QR. Densest encoding, scans fastest.',
+  },
+  affiliates: {
+    heading: 'Fun with QR codes?',
+    blurb: 'Print yours on stickers or labels.',
+    products: {
+      qrStickerPaper: 'QR sticker paper →',
+      } satisfies Record<AffiliateProductKey, string>,
+    disclosure: 'As an Amazon Associate I earn from qualifying purchases.',
   },
   download: {
     filename: 'Filename',

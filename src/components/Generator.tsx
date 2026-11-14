@@ -6,6 +6,7 @@ import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
 import { DownloadBar } from '@/components/DownloadBar';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
+import { AffiliateBlock } from '@/components/AffiliateBlock';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
@@ -91,6 +92,8 @@ export function Generator() {
         </div>
       </main>
 
+      <AffiliateBlock />
+
       <footer className="border-t border-[var(--border)] mt-10">
         <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
           <span>
@@ -108,6 +111,30 @@ export function Generator() {
               qr-code-styling
             </a>
           </span>
+          <a
+            href="https://donotpanic.space"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--hawk)] transition-colors"
+          >
+            {t.footer.home}
+          </a>
+          <a
+            href="https://github.com/DNP42/qrc-gen"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--hawk)] transition-colors"
+          >
+            {t.footer.source}
+          </a>
+          <a
+            href="https://ko-fi.com/smokrates"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-[var(--hawk)] text-[var(--hawk)] px-3 py-1 hover:bg-[var(--hawk)] hover:text-black transition-colors"
+          >
+            {t.footer.kofi}
+          </a>
         </div>
       </footer>
     </div>
