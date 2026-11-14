@@ -44,6 +44,9 @@ export const en = {
   footer: {
     builtBy: 'built in the void · open source · vibe by',
     poweredBy: 'powered by',
+    home: 'donotpanic.space',
+    source: 'source →',
+    kofi: '☕ Free forever. Buy us a coffee',
   },
   // Unknown URLs have no language, so global-not-found.tsx shows every
   // language's block one after the other.
