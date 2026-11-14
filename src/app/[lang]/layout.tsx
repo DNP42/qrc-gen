@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
+import { Analytics } from "@vercel/analytics/next";
 import { hasLocale, locales, ogLocales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { geistMono, geistSans } from "../fonts";
@@ -65,7 +66,10 @@ export default async function RootLayout({
       lang={lang}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
