@@ -131,6 +131,14 @@ export const sl: Dictionary = {
     textHint: 'Narisano čez sredino kode. Popravljanje napak samodejno skoči na H.',
     noneHint: 'Gola QR koda. Najgostejši zapis, najhitrejše skeniranje.',
   },
+  affiliates: {
+    heading: 'Zabava s QR kodami?',
+    blurb: 'Natiskaj svojo na nalepke ali etikete.',
+    products: {
+      qrStickerPaper: 'nalepke za QR kode →',
+      },
+    disclosure: 'Kot Amazonov partner zaslužim pri kvalificiranih nakupih.',
+  },
   download: {
     filename: 'Ime datoteke',
     png: 'Prenesi PNG',
