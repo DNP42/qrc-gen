@@ -16,21 +16,21 @@ const charCount: PluralForms = { one: '{n} char', other: '{n} chars' };
  */
 export const en = {
   meta: {
-    title: 'qrc-gen — QR codes from the void',
+    title: 'qrc-gen — Free QR Code Generator',
     description:
-      'Free QR code generator. URLs, Wi-Fi, vCards. Optional logo or text in the middle. No accounts, no tracking, no bullshit.',
-    ogDescription: 'Free QR code generator. No accounts, no tracking, no bullshit.',
+      'Free QR code generator. URLs, Wi-Fi, vCards. Optional logo or text overlay. No accounts. No tracking.',
+    ogDescription: 'Free QR code generator. No accounts. No tracking.',
   },
   header: {
-    tagline: 'QR codes from the void',
+    tagline: 'Free QR code generator',
     github: 'github →',
     language: 'Language',
   },
   hero: {
     title: 'Generate QR codes.',
-    titleMuted: 'No accounts. No tracking. No bullshit.',
+    titleMuted: 'No accounts. No tracking. No data collected.',
     intro:
-      'Built for URLs, Wi-Fi networks, and contact cards. Drop in a logo or center text — error correction auto-bumps so it still scans. PNG and SVG out.',
+      'Built for URLs, Wi-Fi networks, and contact cards. Add a logo or center text. Error correction adjusts automatically so the code still scans. PNG and SVG output.',
   },
   cards: {
     content: 'Content',
@@ -39,20 +39,20 @@ export const en = {
     export: 'Export',
   },
   preview: {
-    loading: 'booting matrix…',
+    loading: 'Generating…',
   },
   footer: {
-    builtBy: 'built in the void · open source · vibe by',
+    builtBy: 'Open source · built by',
     poweredBy: 'powered by',
     home: 'donotpanic.space',
     source: 'source →',
-    kofi: '☕ Free forever. Buy us a coffee',
+    kofi: 'Free forever. Support the project',
   },
   // Unknown URLs have no language, so global-not-found.tsx shows every
   // language's block one after the other.
   notFound: {
-    heading: 'Signal lost.',
-    body: 'No such page. We checked the void twice.',
+    heading: 'Page not found.',
+    body: 'The page you requested does not exist.',
     back: 'back to the generator →',
   },
   content: {
@@ -99,7 +99,7 @@ export const en = {
     cornerSquares: 'Corner squares',
     cornerDots: 'Corner dots',
     padding: 'Padding',
-    paddingHint: 'Quiet zone around the code. Starve it and phones give up.',
+    paddingHint: 'Quiet zone around the code. Too small and some scanners will fail.',
     paddingValue: '{n} px',
     overlay: 'Overlay (optional)',
     presets: {
@@ -135,13 +135,13 @@ export const en = {
     chooseImage: 'Choose image…',
     overlayPreviewAlt: 'overlay preview',
     clear: 'clear',
-    textPlaceholder: 'hi (max 6 chars)',
+    textPlaceholder: 'text (max 6 chars)',
     textHint: 'Drawn over the QR center. Error correction auto-bumps to H.',
     noneHint: 'Plain QR. Densest encoding, scans fastest.',
   },
   affiliates: {
-    heading: 'Fun with QR codes?',
-    blurb: 'Print yours on stickers or labels.',
+    heading: 'Take it offline',
+    blurb: 'Print your QR code on sticker paper or labels.',
     products: {
       qrStickerPaper: 'QR sticker paper →',
       } satisfies Record<AffiliateProductKey, string>,
