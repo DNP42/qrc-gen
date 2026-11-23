@@ -29,15 +29,44 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
   const latestRef = useRef<QRConfig>(config);
   const frameRef = useRef<number | null>(null);
   const settleRef = useRef<number | null>(null);
+  const tokenRef = useRef(0);
+
+  /** True once the library has painted something (the background fill counts). */
+  const isDrawn = (c: HTMLCanvasElement) => {
+    if (!c.width || !c.height) return false;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return false;
+    for (let i = 1; i <= 4; i++) {
+      for (let j = 1; j <= 4; j++) {
+        const px = ctx.getImageData(Math.floor((c.width * i) / 5), Math.floor((c.height * j) / 5), 1, 1).data;
+        if (px[3] !== 0) return true;
+      }
+    }
+    return false;
+  };
 
   const copyToVisible = () => {
     const visible = visibleRef.current;
     const source = stageRef.current?.querySelector('canvas');
-    if (!visible || !source || !source.width) return;
+    if (!visible || !source || !isDrawn(source)) return;
     if (visible.width !== source.width) visible.width = source.width;
     if (visible.height !== source.height) visible.height = source.height;
     // Assigning width clears the canvas, so draw straight after a resize only.
     visible.getContext('2d')?.drawImage(source, 0, 0);
+  };
+
+  /**
+   * The library paints asynchronously (always for a center image, and on some
+   * loads for plain codes too). Retry the copy each frame for about half a
+   * second; an undrawn stage is never copied, so the visible canvas keeps the
+   * last good frame and is never blank.
+   */
+  const pump = (token: number, left: number) => {
+    if (token !== tokenRef.current) return;
+    const stage = stageRef.current;
+    if (stage && !stage.querySelector('canvas')) qrRef.current?.append(stage);
+    copyToVisible();
+    if (left > 0) requestAnimationFrame(() => pump(token, left - 1));
   };
 
   const render = () => {
@@ -59,15 +88,13 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
       qrRef.current.update(options);
     }
 
-    // Plain codes draw synchronously. A center image finishes a tick later:
-    // copy again after it loads. The visible canvas keeps the last good frame
-    // in between.
-    copyToVisible();
+    const token = ++tokenRef.current;
+    pump(token, 30);
     if (overlayImage) {
       if (settleRef.current !== null) window.clearTimeout(settleRef.current);
       const img = new Image();
       img.onload = img.onerror = () => {
-        settleRef.current = window.setTimeout(copyToVisible, 30);
+        settleRef.current = window.setTimeout(() => token === tokenRef.current && copyToVisible(), 30);
       };
       img.src = overlayImage;
     }
@@ -81,6 +108,7 @@ export const QRPreview = forwardRef<QRPreviewHandle, Props>(function QRPreview(
 
   useEffect(
     () => () => {
+      tokenRef.current++;
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       if (settleRef.current !== null) window.clearTimeout(settleRef.current);
     },
