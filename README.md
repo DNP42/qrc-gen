@@ -14,6 +14,7 @@ PNG and SVG export, all client-side.
 - **Auto error-correction bump** — switches to level H whenever an overlay is on, so the QR stays scannable through ~30% occlusion
 - **Style controls** — foreground/background colors, six color presets, six dot styles, three corner-square styles, two corner-dot styles, quiet-zone padding, optional two-color gradient (linear or radial), logo margin
 - **PNG + SVG export** — vector output is a first-class citizen
+- **Printed-sign caption** — optional text above or below the code, as plain text or a bar in a rounded frame. Five self-hosted open fonts (`public/fonts`, SIL OFL), č/š/ž supported. The SVG embeds its font, so it looks the same everywhere.
 - **English + Slovenian** — `/en` and `/sl`, statically built; `/` picks one from the browser language
 - **Zero backend** — no API routes, no database, no telemetry. Everything runs in the browser.
 
@@ -71,6 +72,7 @@ src/
     ContentTabs.tsx   → URL / Wi-Fi / vCard inputs
     StylePanel.tsx    → colors, dot styles, padding, overlay controls
     QRPreview.tsx     → mounts qr-code-styling, redraws on config change
+    CaptionPanel.tsx / CaptionedPreview.tsx → caption controls + preview layer (layout in lib/caption.ts)
     DownloadBar.tsx   → PNG + SVG download
   i18n/               → EN/SL dictionaries, locale config, plural helper
   lib/

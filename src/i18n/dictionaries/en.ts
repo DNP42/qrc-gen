@@ -145,6 +145,24 @@ export const en = {
     imageMargin: 'Logo margin',
     noneHint: 'Plain QR. Densest encoding, scans fastest.',
   },
+  caption: {
+    title: 'Caption (optional)',
+    text: 'Caption text',
+    placeholder: 'e.g. Kraljičina pesem',
+    hint: 'Drawn around the code, not encoded. Keep it short; long text is cut with an ellipsis.',
+    style: 'Label style',
+    styles: { none: 'none', text: 'plain text', bar: 'bar' },
+    position: 'Position',
+    positions: { above: 'above', below: 'below' },
+    align: 'Alignment',
+    aligns: { left: 'left', center: 'center', right: 'right' },
+    font: 'Font',
+    fontSize: 'Font size',
+    fontSizeValue: '{n} px',
+    barColor: 'Bar color',
+    textColor: 'Text color',
+    resetColors: 'use QR colors',
+  },
   affiliates: {
     heading: 'Take it offline',
     blurb: 'Gear for printing and displaying QR codes.',
@@ -163,6 +181,7 @@ export const en = {
     filename: 'Filename',
     png: 'Download PNG',
     svg: 'Download SVG',
+    captionError: 'Could not build the captioned file. Try again.',
     // ASCII only: the download sanitizer replaces anything else with '-'.
     defaultNames: {
       url: 'qrcode',

@@ -200,3 +200,11 @@ input[type="checkbox"]:focus-visible {
 .range:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 3px rgba(57, 255, 122, 0.25), 0 0 10px rgba(57, 255, 122, 0.55);
 }
+
+/* With a caption the frame and glow come from the caption layer, so the
+   QR preview drops its own border and shadow (the export has none either). */
+.qr-captioned .qr-frame {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
