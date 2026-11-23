@@ -201,7 +201,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Pills<T extends string>({
+export function Pills<T extends string>({
   options,
   labels,
   value,
@@ -232,7 +232,7 @@ function Pills<T extends string>({
   );
 }
 
-function ColorPick({
+export function ColorPick({
   label,
   value,
   onChange,
