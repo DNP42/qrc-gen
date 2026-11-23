@@ -7,7 +7,8 @@
   --surface-2: #161616;
   --border: #1f1f1f;
   --border-hot: #2a2a2a;
-  --muted: #6b6b6b;
+  /* 7.0:1 on --background, 6.4:1 on --surface-2 (was #6b6b6b, 3.4:1). */
+  --muted: #9a9a9a;
   --hawk: #39ff7a;
   --hawk-dim: #1f8f3f;
   --danger: #ff4d6d;
@@ -57,6 +58,18 @@ body {
   animation: scanline 2.4s ease-in-out infinite;
 }
 
+/* Visible keyboard focus on buttons, links and pills (14:1 on the background). */
+a:focus-visible,
+button:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--hawk);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline { animation: none; }
+}
+
 /* Form inputs share one look */
 .field {
   width: 100%;
@@ -83,7 +96,7 @@ body {
 
 .label {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);

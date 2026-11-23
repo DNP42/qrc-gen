@@ -1,5 +1,4 @@
 import type { ContentType } from '@/components/ContentTabs';
-import type { AffiliateProductKey } from '@/config/affiliates';
 import type { VCardInput, WifiEncryption } from '@/lib/formatters';
 import type { CornerDotStyle, CornerSquareStyle, DotStyle } from '@/lib/qr';
 import type { PluralForms } from '../format';
@@ -137,15 +136,28 @@ export const en = {
     clear: 'clear',
     textPlaceholder: 'text (max 6 chars)',
     textHint: 'Drawn over the QR center. Error correction auto-bumps to H.',
+    gradient: 'Gradient',
+    gradientOn: 'use gradient',
+    gradientFrom: 'From',
+    gradientTo: 'To',
+    gradientTypes: { linear: 'linear', radial: 'radial' },
+    gradientHint: 'Keep both colors clearly darker or lighter than the background, or the code will not scan.',
+    imageMargin: 'Logo margin',
     noneHint: 'Plain QR. Densest encoding, scans fastest.',
   },
   affiliates: {
     heading: 'Take it offline',
-    blurb: 'Print your QR code on sticker paper or labels.',
-    products: {
-      qrStickerPaper: 'QR sticker paper →',
-      } satisfies Record<AffiliateProductKey, string>,
-    disclosure: 'As an Amazon Associate I earn from qualifying purchases.',
+    blurb: 'Gear for printing and displaying QR codes.',
+    disclosure: 'As an Amazon Associate we earn from qualifying purchases.',
+  },
+  moreFrom: {
+    heading: 'More from DoNotPanic',
+    links: {
+      hub: { label: 'Web + DNS setup', note: 'Paid setup for your site and domain.' },
+      links: { label: 'Links', note: 'All DoNotPanic projects in one place.' },
+      dj: { label: 'DJ', note: 'Music and mixes.' },
+      qttt: { label: 'Quantum tic-tac-toe', note: 'A game to play.' },
+    },
   },
   download: {
     filename: 'Filename',
