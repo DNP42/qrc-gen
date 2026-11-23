@@ -58,6 +58,18 @@ body {
   animation: scanline 2.4s ease-in-out infinite;
 }
 
+/* Visible keyboard focus on buttons, links and pills (14:1 on the background). */
+a:focus-visible,
+button:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--hawk);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline { animation: none; }
+}
+
 /* Form inputs share one look */
 .field {
   width: 100%;
