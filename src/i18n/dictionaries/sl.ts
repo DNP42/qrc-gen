@@ -129,15 +129,28 @@ export const sl: Dictionary = {
     clear: 'počisti',
     textPlaceholder: 'besedilo (do 6 znakov)',
     textHint: 'Narisano čez sredino kode. Popravljanje napak samodejno skoči na H.',
+    gradient: 'Prelivanje',
+    gradientOn: 'uporabi prelivanje',
+    gradientFrom: 'Od',
+    gradientTo: 'Do',
+    gradientTypes: { linear: 'linearno', radial: 'radialno' },
+    gradientHint: 'Obe barvi naj bosta jasno temnejši ali svetlejši od ozadja, sicer se koda ne skenira.',
+    imageMargin: 'Rob logotipa',
     noneHint: 'Gola QR koda. Najgostejši zapis, najhitrejše skeniranje.',
   },
   affiliates: {
     heading: 'Natisni svojo QR kodo',
-    blurb: 'Natisni QR kodo na nalepke ali etikete.',
-    products: {
-      qrStickerPaper: 'nalepke za QR kode →',
-      },
-    disclosure: 'Kot Amazonov partner zaslužim pri kvalificiranih nakupih.',
+    blurb: 'Oprema za tisk in prikaz QR kod.',
+    disclosure: 'Kot Amazonov partner zaslužimo pri kvalificiranih nakupih.',
+  },
+  moreFrom: {
+    heading: 'Več od DoNotPanic',
+    links: {
+      hub: { label: 'Spletna stran + DNS', note: 'Plačljiva postavitev strani in domene.' },
+      links: { label: 'Povezave', note: 'Vsi projekti DoNotPanic na enem mestu.' },
+      dj: { label: 'DJ', note: 'Glasba in miksi.' },
+      qttt: { label: 'Kvantni križci in krožci', note: 'Igra za igranje.' },
+    },
   },
   download: {
     filename: 'Ime datoteke',

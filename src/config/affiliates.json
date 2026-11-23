@@ -1,0 +1,5 @@
+[
+  { "name": "QR sticker paper", "url": "#amazon-sticker-paper", "image": "", "note": "Printable sticker sheets for QR codes.", "enabled": false },
+  { "name": "Label printer", "url": "#amazon-label-printer", "image": "", "note": "Thermal label printer for QR labels.", "enabled": false },
+  { "name": "NFC / QR table stand", "url": "#amazon-table-stand", "image": "", "note": "Acrylic stand to show a QR code on a table.", "enabled": false }
+]

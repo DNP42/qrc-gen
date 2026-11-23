@@ -4,6 +4,8 @@ import { useDict } from '@/i18n/I18nProvider';
 import type { Dictionary } from '@/i18n/dictionaries/en';
 import { interpolate } from '@/i18n/format';
 import {
+  IMAGE_MARGIN_MAX,
+  IMAGE_MARGIN_MIN,
   MARGIN_MAX,
   MARGIN_MIN,
   clampMargin,
@@ -82,6 +84,41 @@ export function StylePanel({ config, onChange }: Props) {
         </div>
       </Section>
 
+      <Section title={t.gradient}>
+        <label className="flex items-center gap-2 font-mono text-xs text-[var(--foreground)] cursor-pointer min-h-8">
+          <input
+            type="checkbox"
+            checked={config.gradient.enabled}
+            onChange={(e) => update({ gradient: { ...config.gradient, enabled: e.target.checked } })}
+            className="w-4 h-4 accent-[var(--hawk)]"
+          />
+          {t.gradientOn}
+        </label>
+        {config.gradient.enabled && (
+          <div className="mt-3 space-y-3">
+            <Pills
+              options={['linear', 'radial'] as const}
+              labels={t.gradientTypes}
+              value={config.gradient.type}
+              onChange={(type) => update({ gradient: { ...config.gradient, type } })}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <ColorPick
+                label={t.gradientFrom}
+                value={config.gradient.from}
+                onChange={(from) => update({ gradient: { ...config.gradient, from } })}
+              />
+              <ColorPick
+                label={t.gradientTo}
+                value={config.gradient.to}
+                onChange={(to) => update({ gradient: { ...config.gradient, to } })}
+              />
+            </div>
+            <p className="font-mono text-xs text-[var(--muted)]">{t.gradientHint}</p>
+          </div>
+        )}
+      </Section>
+
       <Section title={t.dotStyle}>
         <Pills
           options={DOT_STYLES}
@@ -130,6 +167,26 @@ export function StylePanel({ config, onChange }: Props) {
 
       <Section title={t.overlay}>
         <OverlayControls overlay={config.overlay} onChange={(overlay) => update({ overlay })} />
+        {config.overlay.kind !== 'none' && (
+          <div className="mt-3">
+            <div className="label">{t.imageMargin}</div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                className="range min-w-0 flex-1"
+                min={IMAGE_MARGIN_MIN}
+                max={IMAGE_MARGIN_MAX}
+                step={1}
+                value={config.imageMargin}
+                aria-label={t.imageMargin}
+                onChange={(e) => update({ imageMargin: Number(e.target.value) })}
+              />
+              <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
+                {interpolate(t.paddingValue, { n: config.imageMargin })}
+              </span>
+            </div>
+          </div>
+        )}
       </Section>
     </div>
   );
