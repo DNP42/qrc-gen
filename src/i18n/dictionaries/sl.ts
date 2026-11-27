@@ -41,6 +41,119 @@ export const sl: Dictionary = {
     source: 'izvorna koda →',
     kofi: 'Za vedno zastonj. Podpri projekt',
   },
+  legal: {
+    back: '← nazaj na generator',
+    navLabel: 'Pravno',
+    nav: { privacy: 'Zasebnost', imprint: 'Impresum', terms: 'Pogoji' },
+    updated: 'Nazadnje posodobljeno: {date}',
+    pages: {
+      privacy: {
+        title: 'Politika zasebnosti',
+        intro:
+          'qrc-gen je brezplačno orodje. Ne zahteva prijave in ne zbira tvojih podatkov. Ta stran pojasni, kaj se kljub temu zgodi.',
+        sections: [
+          {
+            heading: 'Kaj ostane v tvojem brskalniku',
+            body: [
+              'Vse, kar vpišeš (povezave, podatke za Wi-Fi, kontaktne podatke, naslove, napise, logotipe), se v kodo QR pretvori v tvojem brskalniku. Nikoli se ne pošlje na strežnik.',
+              'Pisave za naslove in napise se nalagajo s te strani, ne od tretje osebe.',
+            ],
+          },
+          {
+            heading: 'Piškotki in shranjevanje',
+            body: [
+              'Ta stran ne nastavlja piškotkov in ne uporablja analitike, oglaševalskih ali sledilnih orodij. Zato ne prikazuje obvestila o piškotkih.',
+            ],
+          },
+          {
+            heading: 'Gostovanje',
+            body: [
+              'Stran gostuje pri podjetju Vercel. Ko odpreš stran, strežniki Vercel obdelajo tehnične podatke, kot so tvoj naslov IP, vrsta brskalnika in čas zahteve, da stran dostavijo in jo zaščitijo. Upravljavec te podatke uporablja samo za delovanje in varnost strani. Pravna podlaga: zakoniti interes za delovanje varne spletne strani (člen 6(1)(f) GDPR).',
+            ],
+          },
+          {
+            heading: 'Povezave na druge strani',
+            body: [
+              'Stran vsebuje povezave na GitHub, Ko-fi in druge strani DoNotPanic ter, kjer so prikazane, na Amazon. S klikom na povezavo zapustiš to stran in zanjo velja politika zasebnosti tiste strani. Partnerske povezave so označene, upravljavec pa lahko prejme provizijo za upravičene nakupe.',
+            ],
+          },
+          {
+            heading: 'Tvoje pravice',
+            body: [
+              'Po GDPR lahko zahtevaš vpogled, popravek ali izbris osebnih podatkov o tebi in ugovarjaš njihovi obdelavi. Ta stran sama ne zbira osebnih podatkov, zato običajno ni ničesar za posredovati. Lahko pa pišeš na kontaktni naslov v impresumu. Pritožiš se lahko tudi pri nacionalnem organu za varstvo podatkov.',
+            ],
+          },
+          {
+            heading: 'Spremembe',
+            body: [
+              'Če se to spremeni, na primer če bi dodali analitiko, najprej posodobimo to stran in zgornji datum.',
+            ],
+          },
+        ],
+      },
+      imprint: {
+        title: 'Impresum',
+        intro: 'Podatki o tem, kdo upravlja to stran.',
+        sections: [
+          {
+            heading: 'Upravljavec',
+            body: [
+              'Ime: [ime upravljavca, dopolni lastnik]',
+              'Naslov: [poštni naslov, dopolni lastnik]',
+              'Status: [na primer samostojni podjetnik ali podjetje, dopolni lastnik]',
+            ],
+          },
+          { heading: 'Stik', body: ['E-pošta: [kontaktna e-pošta, dopolni lastnik]'] },
+          { heading: 'Davki', body: ['ID za DDV: [če obstaja, dopolni lastnik]'] },
+          { heading: 'Gostovanje', body: ['Vercel Inc., ZDA.'] },
+        ],
+      },
+      terms: {
+        title: 'Pogoji uporabe',
+        intro: 'qrc-gen je brezplačen. Z uporabo se strinjaš s temi pogoji.',
+        sections: [
+          {
+            heading: 'Storitev',
+            body: [
+              'qrc-gen ustvarja kode QR v tvojem brskalniku. Na voljo je takšen, kot je, brez kakršnega koli jamstva, in se lahko kadar koli spremeni ali preneha.',
+            ],
+          },
+          {
+            heading: 'Tvoja vsebina',
+            body: [
+              'Ti določiš, kaj koda vsebuje. Odgovarjaš zanjo, za pravico do uporabe dodanega logotipa ali besedila in za to, kam koda vodi. Orodja ne uporabljaj za nezakonito, zavajajočo ali škodljivo vsebino, vključno s povezavami na zlonamerno programje ali lažno predstavljanje.',
+            ],
+          },
+          {
+            heading: 'Preveri pred tiskom',
+            body: [
+              'Kodo vedno preberi z več napravami, preden jo natisneš ali objaviš. Barve, logotipi, odmik in zaobljeni robovi lahko kodo težje berljivo naredijo. Upravljavec ne odgovarja za natisnjene kode, ki se ne preberejo.',
+            ],
+          },
+          {
+            heading: 'Odgovornost',
+            body: [
+              'V obsegu, ki ga dovoljuje zakon, upravljavec ne odgovarja za škodo, ki nastane z uporabo orodja ali kod, narejenih z njim. Nič v teh pogojih ne omejuje odgovornosti, ki je po zakonu ni mogoče omejiti.',
+            ],
+          },
+          {
+            heading: 'Programje in povezave tretjih oseb',
+            body: [
+              'Risanje kode QR uporablja odprtokodno knjižnico qr-code-styling. Pisave za napise so odprte pisave z licenco SIL Open Font License. Povezave na druge strani niso pod nadzorom upravljavca.',
+            ],
+          },
+          {
+            heading: 'Partnerske povezave',
+            body: ['Nekatere povezave so lahko partnerske. Kot partner Amazona zaslužimo z upravičenimi nakupi.'],
+          },
+          {
+            heading: 'Veljavno pravo',
+            body: ['Za te pogoje velja pravo [država upravljavca, dopolni lastnik].'],
+          },
+        ],
+      },
+    },
+  },
   notFound: {
     heading: 'Stran ni najdena.',
     body: 'Stran, ki ste jo zahtevali, ne obstaja.',
