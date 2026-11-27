@@ -1,34 +1,44 @@
 /**
- * Caption layer: a printed-sign label drawn around or next to the QR code.
+ * Caption layer: a title above and a caption below the QR code, inside an
+ * optional frame.
  *
  * This file never touches buildOptions(). The QR is generated exactly as
- * before; the caption is geometry computed here and painted on top of / next
- * to it. One layout object feeds the live preview (React SVG), the PNG
- * (canvas) and the SVG (string), so all three match.
+ * before; the text and frame are geometry computed here and painted around
+ * it. One layout object feeds the live preview (React SVG), the PNG (canvas)
+ * and the SVG (string), so all three match.
  */
 import QRCodeStyling from 'qr-code-styling';
 import { buildOptions, textToImage, type QRConfig } from '@/lib/qr';
 
-export type CaptionStyle = 'none' | 'text' | 'bar';
+export type FrameStyle = 'bar' | 'plain';
 export type CaptionAlign = 'left' | 'center' | 'right';
 export type CaptionFontId = 'inter' | 'playfair' | 'nunito' | 'jetbrains' | 'anton';
 
-export interface CaptionConfig {
-  /** Headline above the QR. */
-  title: string;
-  /** Title size in px on the default 320px code; scales with the code size. */
-  titleSize: number;
-  /** Caption below the QR. */
+/** One block of text: the title above the code, or the caption below it. */
+export interface TextBlockConfig {
   text: string;
-  style: CaptionStyle;
-  align: CaptionAlign;
-  font: CaptionFontId;
   /** Font size in px on the default 320px code; scales with the code size. */
-  fontSize: number;
+  size: number;
+  font: CaptionFontId;
+  align: CaptionAlign;
+  /** null follows the QR background on a bar, the QR foreground on plain. */
+  color: string | null;
+}
+
+export interface FrameConfig {
+  style: FrameStyle;
   /** null follows the QR foreground. */
   barColor: string | null;
-  /** null follows the QR background on a bar, the QR foreground on plain text. */
-  textColor: string | null;
+  /** Corner radius of the whole sign, px on the default 320px code. */
+  outerRadius: number;
+  /** Corner radius of the QR code itself, px on the default 320px code. */
+  innerRadius: number;
+}
+
+export interface CaptionConfig {
+  frame: FrameConfig;
+  title: TextBlockConfig;
+  caption: TextBlockConfig;
 }
 
 export const CAPTION_MAX_LENGTH = 240;
@@ -36,22 +46,17 @@ export const CAPTION_MAX_LINES = 6;
 /** Line spacing as a multiple of the font size. */
 const LINE_HEIGHT = 1.25;
 export const FONT_SIZE_MIN = 12;
-export const FONT_SIZE_MAX = 48;
-export const TITLE_SIZE_MIN = 12;
+export const CAPTION_SIZE_MAX = 48;
 export const TITLE_SIZE_MAX = 72;
+export const RADIUS_MIN = 0;
+export const RADIUS_MAX = 60;
 /** The PNG is rendered this many times larger than the on-screen code. */
 export const EXPORT_SCALE = 3;
 
 export const DEFAULT_CAPTION: CaptionConfig = {
-  title: '',
-  titleSize: 32,
-  text: '',
-  style: 'bar',
-  align: 'center',
-  font: 'inter',
-  fontSize: 24,
-  barColor: null,
-  textColor: null,
+  frame: { style: 'bar', barColor: null, outerRadius: 28, innerRadius: 14 },
+  title: { text: '', size: 32, font: 'inter', align: 'center', color: null },
+  caption: { text: '', size: 24, font: 'inter', align: 'center', color: null },
 };
 
 export interface CaptionFont {
@@ -75,7 +80,7 @@ export function fontById(id: CaptionFontId): CaptionFont {
   return CAPTION_FONTS.find((f) => f.id === id) ?? CAPTION_FONTS[0];
 }
 
-/** Caption text as trimmed lines: blank edges dropped, at most CAPTION_MAX_LINES. */
+/** Text as trimmed lines: blank edges dropped, at most CAPTION_MAX_LINES. */
 export function captionLines(text: string): string[] {
   const lines = text.split(/\r?\n/).map((l) => l.trim());
   while (lines.length && !lines[0]) lines.shift();
@@ -83,8 +88,18 @@ export function captionLines(text: string): string[] {
   return lines.slice(0, CAPTION_MAX_LINES);
 }
 
+/** The frame and corners are drawn only when there is a title or a caption. */
 export function isCaptionActive(c: CaptionConfig): boolean {
-  return c.style !== 'none' && (c.title.trim().length > 0 || c.text.trim().length > 0);
+  return c.title.text.trim().length > 0 || c.caption.text.trim().length > 0;
+}
+
+/** Fonts the current title and caption use (each loaded once). */
+export function activeFontIds(c: CaptionConfig): CaptionFontId[] {
+  const ids: CaptionFontId[] = [];
+  for (const block of [c.title, c.caption]) {
+    if (block.text.trim() && !ids.includes(block.font)) ids.push(block.font);
+  }
+  return ids;
 }
 
 // ---------------------------------------------------------------- fonts
@@ -121,6 +136,7 @@ export interface TextBlock {
   color: string;
   /** One entry per line; `y` is the baseline. */
   lines: { str: string; y: number }[];
+  font: CaptionFontId;
   family: string;
   weight: number;
 }
@@ -133,11 +149,15 @@ export interface CaptionLayout {
   qrX: number;
   qrY: number;
   qrSize: number;
+  /** Corner radius of the QR canvas. */
+  qrRadius: number;
+  /** Corner radius of the whole sign. */
+  outerRadius: number;
   /** Bar style: outer frame minus the QR window, filled with `frameColor`. */
   framePath: string | null;
   frameColor: string;
-  /** Plain-text style: strips filled with the QR background. */
-  strips: { x: number; y: number; w: number; h: number; color: string }[];
+  /** Plain style: a plate in the QR background color behind everything. */
+  plateColor: string | null;
   /** Title (above the QR) and caption (below it), in that order. */
   blocks: TextBlock[];
 }
@@ -168,47 +188,48 @@ function baselines(n: number, cy: number, fs: number, capH: number): number[] {
   return Array.from({ length: n }, (_, i) => Math.round(top + capH + i * lh));
 }
 
-function rrect(x: number, y: number, w: number, h: number, r: [number, number, number, number]): string {
-  const [tl, tr, br, bl] = r;
+/** Rounded rectangle path; every radius is capped so the arcs never overlap. */
+export function roundedRectPath(x: number, y: number, w: number, h: number, radius: number): string {
+  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
   return (
-    `M${x + tl} ${y}H${x + w - tr}A${tr} ${tr} 0 0 1 ${x + w} ${y + tr}` +
-    `V${y + h - br}A${br} ${br} 0 0 1 ${x + w - br} ${y + h}` +
-    `H${x + bl}A${bl} ${bl} 0 0 1 ${x} ${y + h - bl}` +
-    `V${y + tl}A${tl} ${tl} 0 0 1 ${x + tl} ${y}Z`
+    `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}` +
+    `V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}` +
+    `H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}` +
+    `V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
   );
 }
 
-export function computeLayout(
-  qr: Pick<QRConfig, 'size' | 'fgColor' | 'bgColor'>,
-  cap: CaptionConfig,
-): CaptionLayout {
+type LayoutInput = Pick<QRConfig, 'size' | 'margin' | 'fgColor' | 'bgColor'>;
+
+export function computeLayout(qr: LayoutInput, cap: CaptionConfig): CaptionLayout {
   const size = qr.size;
   const base: CaptionLayout = {
-    active: false, w: size, h: size, qrX: 0, qrY: 0, qrSize: size,
-    framePath: null, frameColor: qr.fgColor, strips: [], blocks: [],
+    active: false, w: size, h: size, qrX: 0, qrY: 0, qrSize: size, qrRadius: 0, outerRadius: 0,
+    framePath: null, frameColor: qr.fgColor, plateColor: null, blocks: [],
   };
   if (!isCaptionActive(cap)) return base;
 
   const k = size / 320;
-  const font = fontById(cap.font);
-  const bar = cap.style === 'bar';
-  const anchor = cap.align === 'left' ? 'start' : cap.align === 'right' ? 'end' : 'middle';
-  const barColor = cap.barColor ?? qr.fgColor;
-  const textColor = cap.textColor ?? (bar ? qr.bgColor : qr.fgColor);
+  const bar = cap.frame.style === 'bar';
+  // The corner is capped by the quiet zone, so rounding never cuts a finder pattern.
+  const qrRadius = Math.min(Math.round(cap.frame.innerRadius * k), Math.max(0, qr.margin));
+  const outerRadius = Math.round(cap.frame.outerRadius * k);
 
-  const title = { rows: captionLines(cap.title), fs: Math.round(cap.titleSize * k) };
-  const caption = { rows: captionLines(cap.text), fs: Math.round(cap.fontSize * k) };
-  const bandHeight = (s: { rows: string[]; fs: number }) =>
+  const sections = [cap.title, cap.caption].map((block) => ({
+    block,
+    rows: captionLines(block.text),
+    fs: Math.round(block.size * k),
+  }));
+  const [title, caption] = sections;
+  const bandHeight = (s: (typeof sections)[number]) =>
     s.rows.length === 0
       ? 0
       : Math.round(s.fs * (LINE_HEIGHT * s.rows.length + (bar ? 0.35 : 0.25)) + (bar ? 16 : 12) * k);
   const topH = bandHeight(title);
   const botH = bandHeight(caption);
 
-  // Bar style keeps a thin border on a side that has no text.
+  // The bar keeps a thin border on a side that has no text.
   const b = bar ? Math.round(14 * k) : 0;
-  const innerR = Math.round(14 * k);
-  const outerR = innerR + b;
   const w = size + 2 * b;
   const padX = bar ? b + Math.round(8 * k) : Math.round(12 * k);
   const qrY = topH || b;
@@ -216,36 +237,31 @@ export function computeLayout(
   const h = bottomY + (botH || b);
 
   const blocks: TextBlock[] = [];
-  const addBlock = (s: { rows: string[]; fs: number }, centerY: number) => {
+  const addBlock = (s: (typeof sections)[number], centerY: number) => {
     if (s.rows.length === 0) return;
+    const font = fontById(s.block.font);
     const fit = s.rows.map((r) => fitText(r, font, s.fs, w - 2 * padX));
+    const anchor = s.block.align === 'left' ? 'start' : s.block.align === 'right' ? 'end' : 'middle';
     blocks.push({
       x: anchor === 'start' ? padX : anchor === 'end' ? w - padX : w / 2,
       lines: baselines(fit.length, centerY, s.fs, fit[0].capH).map((y, i) => ({ str: fit[i].str, y })),
-      anchor, size: s.fs, color: textColor, family: font.family, weight: font.weight,
+      anchor, size: s.fs, font: font.id, family: font.family, weight: font.weight,
+      color: s.block.color ?? (bar ? qr.bgColor : qr.fgColor),
     });
   };
   addBlock(title, topH / 2);
   addBlock(caption, bottomY + botH / 2);
 
+  const shared = { ...base, active: true, w, h, qrX: b, qrY, qrRadius, outerRadius, blocks };
   if (bar) {
-    // A side with a text band meets the QR square; a side with only a border is rounded.
-    const hole: [number, number, number, number] = [
-      topH ? 0 : innerR, topH ? 0 : innerR, botH ? 0 : innerR, botH ? 0 : innerR,
-    ];
     return {
-      ...base,
-      active: true, w, h, qrX: b, qrY,
-      frameColor: barColor,
-      framePath: rrect(0, 0, w, h, [outerR, outerR, outerR, outerR]) + rrect(b, qrY, size, size, hole),
-      blocks,
+      ...shared,
+      frameColor: cap.frame.barColor ?? qr.fgColor,
+      framePath:
+        roundedRectPath(0, 0, w, h, outerRadius) + roundedRectPath(b, qrY, size, size, qrRadius),
     };
   }
-
-  const strips = [];
-  if (topH) strips.push({ x: 0, y: 0, w, h: topH, color: qr.bgColor });
-  if (botH) strips.push({ x: 0, y: bottomY, w, h: botH, color: qr.bgColor });
-  return { ...base, active: true, w, h, qrX: 0, qrY, strips, blocks };
+  return { ...shared, plateColor: qr.bgColor };
 }
 
 // --------------------------------------------------------------- export
@@ -292,8 +308,11 @@ function toBase64(buf: ArrayBuffer): string {
  * soft, and transparent corners (the rounded bar frame) turn black.
  */
 export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promise<Blob> {
-  await loadCaptionFont(cap.font);
-  const layout = computeLayout({ ...config, size: config.size * EXPORT_SCALE }, cap);
+  await Promise.all(activeFontIds(cap).map(loadCaptionFont));
+  const layout = computeLayout(
+    { ...config, size: config.size * EXPORT_SCALE, margin: config.margin * EXPORT_SCALE },
+    cap,
+  );
   const blob = (await rawQr(config, 'canvas', EXPORT_SCALE).getRawData('png')) as Blob | null;
   if (!blob) throw new Error('QR render failed');
   const bmp = await createImageBitmap(blob);
@@ -304,11 +323,16 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
   if (!ctx) throw new Error('canvas unavailable');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, layout.w, layout.h);
-  for (const strip of layout.strips) {
-    ctx.fillStyle = strip.color;
-    ctx.fillRect(strip.x, strip.y, strip.w, strip.h);
+  if (layout.plateColor) {
+    ctx.fillStyle = layout.plateColor;
+    ctx.fill(new Path2D(roundedRectPath(0, 0, layout.w, layout.h, layout.outerRadius)));
+  }
+  ctx.save();
+  if (layout.qrRadius > 0) {
+    ctx.clip(new Path2D(roundedRectPath(layout.qrX, layout.qrY, layout.qrSize, layout.qrSize, layout.qrRadius)));
   }
   ctx.drawImage(bmp, layout.qrX, layout.qrY, layout.qrSize, layout.qrSize);
+  ctx.restore();
   if (layout.framePath) {
     ctx.fillStyle = layout.frameColor;
     ctx.fill(new Path2D(layout.framePath), 'evenodd');
@@ -325,9 +349,10 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
   );
 }
 
-/** One self-contained SVG: the font is embedded as a base64 woff2 subset. */
+/** One self-contained SVG: each font is embedded as a base64 woff2 subset. */
 export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promise<Blob> {
-  const fontBuf = await loadCaptionFont(cap.font);
+  const fontIds = activeFontIds(cap);
+  const fontBufs = await Promise.all(fontIds.map(loadCaptionFont));
   const layout = computeLayout(config, cap);
   const blob = (await rawQr(config, 'svg').getRawData('svg')) as Blob | null;
   if (!blob) throw new Error('QR render failed');
@@ -338,16 +363,25 @@ export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promis
   const qrMarkup = new XMLSerializer().serializeToString(inner);
 
   const parts: string[] = [];
-  const first = layout.blocks[0];
-  if (first) {
+  const defs: string[] = fontIds.map((id, i) => {
+    const font = fontById(id);
+    return `@font-face{font-family:"${font.family}";font-weight:${font.weight};src:url(data:font/woff2;base64,${toBase64(fontBufs[i])}) format("woff2")}`;
+  });
+  const clipId = 'qrc-qr-clip';
+  const clipped = layout.qrRadius > 0;
+  parts.push(
+    `<defs>${defs.length ? `<style>${defs.join('')}</style>` : ''}` +
+      (clipped
+        ? `<clipPath id="${clipId}"><rect x="${layout.qrX}" y="${layout.qrY}" width="${layout.qrSize}" height="${layout.qrSize}" rx="${layout.qrRadius}" ry="${layout.qrRadius}"/></clipPath>`
+        : '') +
+      `</defs>`,
+  );
+  if (layout.plateColor) {
     parts.push(
-      `<defs><style>@font-face{font-family:"${first.family}";font-weight:${first.weight};src:url(data:font/woff2;base64,${toBase64(fontBuf)}) format("woff2")}</style></defs>`,
+      `<rect width="${layout.w}" height="${layout.h}" rx="${layout.outerRadius}" ry="${layout.outerRadius}" fill="${layout.plateColor}"/>`,
     );
   }
-  for (const s of layout.strips) {
-    parts.push(`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${s.color}"/>`);
-  }
-  parts.push(qrMarkup);
+  parts.push(clipped ? `<g clip-path="url(#${clipId})">${qrMarkup}</g>` : qrMarkup);
   if (layout.framePath) {
     parts.push(`<path d="${layout.framePath}" fill="${layout.frameColor}" fill-rule="evenodd"/>`);
   }

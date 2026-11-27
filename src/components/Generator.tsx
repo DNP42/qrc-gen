@@ -3,8 +3,10 @@
 import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 import { ContentTabs, type ContentType } from '@/components/ContentTabs';
-import { StylePanel } from '@/components/StylePanel';
-import { CaptionPanel } from '@/components/CaptionPanel';
+import { Card } from '@/components/Card';
+import { DesignPanel } from '@/components/DesignPanel';
+import { LogoPanel } from '@/components/LogoPanel';
+import { TextBlockPanel } from '@/components/TextBlockPanel';
 import { CaptionedPreview } from '@/components/CaptionedPreview';
 import { DownloadBar } from '@/components/DownloadBar';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
@@ -12,7 +14,12 @@ import { AffiliateBlock } from '@/components/AffiliateBlock';
 import { MoreFrom } from '@/components/MoreFrom';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
-import { DEFAULT_CAPTION, type CaptionConfig } from '@/lib/caption';
+import {
+  CAPTION_SIZE_MAX,
+  DEFAULT_CAPTION,
+  TITLE_SIZE_MAX,
+  type CaptionConfig,
+} from '@/lib/caption';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
 
 const QRPreview = dynamic(
@@ -36,6 +43,8 @@ export function Generator() {
   };
 
   const filename = t.download.defaultNames[contentType];
+  const firstLine = (text: string) => text.trim().split(/\r?\n/)[0] || t.cards.empty;
+  const followColor = caption.frame.style === 'bar' ? config.bgColor : config.fgColor;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -76,16 +85,62 @@ export function Generator() {
 
         <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,max-content)]">
           <div className="min-w-0 space-y-8">
-            <Card title={t.cards.content}>
+            <Card title={t.cards.content} collapsible defaultOpen>
               <ContentTabs onChange={handleContent} />
             </Card>
 
-            <Card title={t.cards.style}>
-              <StylePanel config={config} onChange={setConfig} />
+            <Card title={t.cards.design} collapsible defaultOpen>
+              <DesignPanel
+                config={config}
+                onChange={setConfig}
+                frame={caption.frame}
+                onFrameChange={(frame) => setCaption((prev) => ({ ...prev, frame }))}
+              />
             </Card>
 
-            <Card title={t.caption.title}>
-              <CaptionPanel config={config} caption={caption} onChange={setCaption} />
+            <Card
+              title={t.cards.title}
+              collapsible
+              defaultOpen={false}
+              summary={firstLine(caption.title.text)}
+            >
+              <TextBlockPanel
+                id="caption-title"
+                block={caption.title}
+                onChange={(title) => setCaption((prev) => ({ ...prev, title }))}
+                textLabel={t.title.label}
+                placeholder={t.title.placeholder}
+                rows={2}
+                sizeMax={TITLE_SIZE_MAX}
+                followColor={followColor}
+              />
+            </Card>
+
+            <Card
+              title={t.cards.caption}
+              collapsible
+              defaultOpen={false}
+              summary={firstLine(caption.caption.text)}
+            >
+              <TextBlockPanel
+                id="caption-text"
+                block={caption.caption}
+                onChange={(block) => setCaption((prev) => ({ ...prev, caption: block }))}
+                textLabel={t.caption.label}
+                placeholder={t.caption.placeholder}
+                rows={3}
+                sizeMax={CAPTION_SIZE_MAX}
+                followColor={followColor}
+              />
+            </Card>
+
+            <Card
+              title={t.cards.logo}
+              collapsible
+              defaultOpen={false}
+              summary={t.style.overlayKinds[config.overlay.kind]}
+            >
+              <LogoPanel config={config} onChange={setConfig} />
             </Card>
           </div>
 
@@ -162,16 +217,5 @@ function PreviewLoading() {
     >
       {t.preview.loading}
     </div>
-  );
-}
-
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
-        {title}
-      </h3>
-      {children}
-    </section>
   );
 }
