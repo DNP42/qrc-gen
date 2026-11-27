@@ -5,6 +5,7 @@ import { interpolate } from '@/i18n/format';
 import {
   CAPTION_FONTS,
   CAPTION_MAX_LENGTH,
+  CAPTION_MAX_LINES,
   FONT_SIZE_MAX,
   FONT_SIZE_MIN,
   type CaptionAlign,
@@ -40,14 +41,16 @@ export function CaptionPanel({ config, caption, onChange }: Props) {
         <label className="label" htmlFor="caption-text">
           {t.text}
         </label>
-        <input
+        <textarea
           id="caption-text"
-          type="text"
-          className="field"
+          className="field resize-y"
+          rows={3}
           maxLength={CAPTION_MAX_LENGTH}
           value={caption.text}
           placeholder={t.placeholder}
-          onChange={(e) => update({ text: e.target.value })}
+          onChange={(e) =>
+            update({ text: e.target.value.split('\n').slice(0, CAPTION_MAX_LINES).join('\n') })
+          }
         />
         <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.hint}</p>
       </div>

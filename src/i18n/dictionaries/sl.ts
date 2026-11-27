@@ -141,8 +141,8 @@ export const sl: Dictionary = {
   caption: {
     title: 'Napis (po želji)',
     text: 'Besedilo napisa',
-    placeholder: 'npr. Kraljičina pesem',
-    hint: 'Nariše se ob kodi, ni zapisano vanjo. Naj bo kratko; predolgo besedilo se skrajša s tremi pikami.',
+    placeholder: 'npr. Skeniraj za meni\nOdprto vsak dan 8–22',
+    hint: 'Nariše se ob kodi, ni zapisano vanjo. Enter naredi novo vrstico (do 6 vrstic). Preširoka vrstica se skrajša s tremi pikami.',
     style: 'Slog napisa',
     styles: { none: 'brez', text: 'navadno besedilo', bar: 'trak' },
     position: 'Položaj',

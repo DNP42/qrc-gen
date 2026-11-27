@@ -28,7 +28,10 @@ export interface CaptionConfig {
   textColor: string | null;
 }
 
-export const CAPTION_MAX_LENGTH = 40;
+export const CAPTION_MAX_LENGTH = 240;
+export const CAPTION_MAX_LINES = 6;
+/** Line spacing as a multiple of the font size. */
+const LINE_HEIGHT = 1.25;
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 48;
 
@@ -62,6 +65,14 @@ export const CAPTION_FONTS: CaptionFont[] = [
 
 export function fontById(id: CaptionFontId): CaptionFont {
   return CAPTION_FONTS.find((f) => f.id === id) ?? CAPTION_FONTS[0];
+}
+
+/** Caption text as trimmed lines: blank edges dropped, at most CAPTION_MAX_LINES. */
+export function captionLines(text: string): string[] {
+  const lines = text.split(/\r?\n/).map((l) => l.trim());
+  while (lines.length && !lines[0]) lines.shift();
+  while (lines.length && !lines[lines.length - 1]) lines.pop();
+  return lines.slice(0, CAPTION_MAX_LINES);
 }
 
 export function isCaptionActive(c: CaptionConfig): boolean {
@@ -110,11 +121,11 @@ export interface CaptionLayout {
   strip: { x: number; y: number; w: number; h: number; color: string } | null;
   text: {
     x: number;
-    y: number;
     anchor: 'start' | 'middle' | 'end';
     size: number;
     color: string;
-    str: string;
+    /** One entry per caption line; `y` is the baseline. */
+    lines: { str: string; y: number }[];
     family: string;
     weight: number;
   } | null;
@@ -137,6 +148,13 @@ function fitText(str: string, font: CaptionFont, size: number, maxW: number) {
   let s = str;
   while (s.length > 1 && ctx.measureText(`${s}…`).width > maxW) s = s.slice(0, -1);
   return { str: `${s.trimEnd()}…`, capH };
+}
+
+/** Baselines for `n` lines centred on `cy`. */
+function baselines(n: number, cy: number, fs: number, capH: number): number[] {
+  const lh = fs * LINE_HEIGHT;
+  const top = cy - ((n - 1) * lh + capH) / 2;
+  return Array.from({ length: n }, (_, i) => Math.round(top + capH + i * lh));
 }
 
 function rrect(x: number, y: number, w: number, h: number, r: [number, number, number, number]): string {
@@ -168,19 +186,21 @@ export function computeLayout(
   const anchor = cap.align === 'left' ? 'start' : cap.align === 'right' ? 'end' : 'middle';
   const barColor = cap.barColor ?? qr.fgColor;
   const textColor = cap.textColor ?? (bar ? qr.bgColor : qr.fgColor);
-  const text = cap.text.trim();
+  const rows = captionLines(cap.text);
+  const n = rows.length;
 
   if (bar) {
     const b = Math.round(14 * k);
     const innerR = Math.round(14 * k);
     const outerR = innerR + b;
-    const bandH = Math.round(fs * 1.6 + 16 * k);
+    const bandH = Math.round(fs * (LINE_HEIGHT * n + 0.35) + 16 * k);
     const w = size + 2 * b;
     const h = size + b + bandH;
     const qrX = b;
     const qrY = below ? b : bandH;
     const padX = b + Math.round(8 * k);
-    const { str, capH } = fitText(text, font, fs, w - 2 * padX);
+    const fit = rows.map((r) => fitText(r, font, fs, w - 2 * padX));
+    const capH = fit[0].capH;
     const bandY = below ? b + size : 0;
     const cy = bandY + bandH / 2;
     const hole: [number, number, number, number] = below
@@ -193,25 +213,26 @@ export function computeLayout(
       framePath: rrect(0, 0, w, h, [outerR, outerR, outerR, outerR]) + rrect(qrX, qrY, size, size, hole),
       text: {
         x: anchor === 'start' ? padX : anchor === 'end' ? w - padX : w / 2,
-        y: Math.round(cy + capH / 2),
-        anchor, size: fs, color: textColor, str, family: font.family, weight: font.weight,
+        lines: baselines(n, cy, fs, capH).map((y, i) => ({ str: fit[i].str, y })),
+        anchor, size: fs, color: textColor, family: font.family, weight: font.weight,
       },
     };
   }
 
-  const stripH = Math.round(fs * 1.5 + 12 * k);
+  const stripH = Math.round(fs * (LINE_HEIGHT * n + 0.25) + 12 * k);
   const padX = Math.round(12 * k);
   const h = size + stripH;
   const stripY = below ? size : 0;
-  const { str, capH } = fitText(text, font, fs, size - 2 * padX);
+  const fit = rows.map((r) => fitText(r, font, fs, size - 2 * padX));
+  const capH = fit[0].capH;
   return {
     ...base,
     active: true, h, qrY: below ? 0 : stripH,
     strip: { x: 0, y: stripY, w: size, h: stripH, color: qr.bgColor },
     text: {
       x: anchor === 'start' ? padX : anchor === 'end' ? size - padX : size / 2,
-      y: Math.round(stripY + stripH / 2 + capH / 2),
-      anchor, size: fs, color: textColor, str, family: font.family, weight: font.weight,
+      lines: baselines(n, stripY + stripH / 2, fs, capH).map((y, i) => ({ str: fit[i].str, y })),
+      anchor, size: fs, color: textColor, family: font.family, weight: font.weight,
     },
   };
 }
@@ -268,7 +289,7 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
     ctx.fillStyle = t.color;
     ctx.textAlign = t.anchor === 'start' ? 'left' : t.anchor === 'end' ? 'right' : 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(t.str, t.x, t.y);
+    for (const l of t.lines) ctx.fillText(l.str, t.x, l.y);
   }
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG encode failed'))), 'image/png'),
@@ -303,9 +324,11 @@ export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promis
     parts.push(`<path d="${layout.framePath}" fill="${layout.frameColor}" fill-rule="evenodd"/>`);
   }
   if (t) {
-    parts.push(
-      `<text x="${t.x}" y="${t.y}" text-anchor="${t.anchor}" font-family="${t.family}, sans-serif" font-weight="${t.weight}" font-size="${t.size}" fill="${t.color}">${escapeXml(t.str)}</text>`,
-    );
+    for (const l of t.lines) {
+      parts.push(
+        `<text x="${t.x}" y="${l.y}" text-anchor="${t.anchor}" font-family="${t.family}, sans-serif" font-weight="${t.weight}" font-size="${t.size}" fill="${t.color}">${escapeXml(l.str)}</text>`,
+      );
+    }
   }
   const svg =
     `<?xml version="1.0" encoding="UTF-8"?>\n` +

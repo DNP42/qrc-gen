@@ -6,7 +6,7 @@ import { localeNames, locales } from '@/i18n/config';
 import { useDict, useLocale } from '@/i18n/I18nProvider';
 
 /**
- * EN | SL links. The URL is the language, so there is nothing to store;
+ * EN | SL | ES links. The URL is the language, so there is nothing to store;
  * switching loads the other page and resets the form.
  */
 export function LanguageSwitch() {

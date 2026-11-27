@@ -13,7 +13,7 @@ const siteUrl = new URL(
     : "https://qr.donotpanic.space",
 );
 
-// Only /en and /sl exist; any other first segment is a 404.
+// Only /en, /sl and /es exist; any other first segment is a 404.
 export const dynamicParams = false;
 
 export function generateStaticParams() {
