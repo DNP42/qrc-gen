@@ -1,32 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  encodeUrl,
-  encodeVCard,
-  encodeWifi,
-  type UrlInput,
-  type VCardInput,
-  type WifiEncryption,
-  type WifiInput,
-} from '@/lib/formatters';
+import type { UrlInput, VCardInput, WifiEncryption, WifiInput } from '@/lib/formatters';
 import { useDict, useLocale } from '@/i18n/I18nProvider';
 import { plural } from '@/i18n/format';
-import { DEFAULT_CONFIG } from '@/lib/qr';
+import { CONTENT_TYPES, type ContentState } from '@/lib/content';
 
-export type ContentType = 'url' | 'wifi' | 'vcard';
+export type { ContentType } from '@/lib/content';
 
 interface Props {
-  onChange: (data: string, type: ContentType) => void;
+  value: ContentState;
+  onChange: (next: ContentState) => void;
 }
 
-const TABS: ContentType[] = ['url', 'wifi', 'vcard'];
+const TABS = CONTENT_TYPES;
 
 const WIFI_ENCRYPTIONS: WifiEncryption[] = ['WPA', 'WEP', 'nopass'];
 
-export function ContentTabs({ onChange }: Props) {
+export function ContentTabs({ value, onChange }: Props) {
   const t = useDict();
-  const [active, setActive] = useState<ContentType>('url');
+  const active = value.type;
 
   return (
     <div>
@@ -34,7 +26,7 @@ export function ContentTabs({ onChange }: Props) {
         {TABS.map((id) => (
           <button
             key={id}
-            onClick={() => setActive(id)}
+            onClick={() => onChange({ ...value, type: id })}
             className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border-b-2 transition-colors ${
               active === id
                 ? 'border-[var(--hawk)] text-[var(--hawk)]'
@@ -47,22 +39,23 @@ export function ContentTabs({ onChange }: Props) {
         ))}
       </div>
 
-      {active === 'url' && <UrlForm onChange={(s) => onChange(s, 'url')} />}
-      {active === 'wifi' && <WifiForm onChange={(s) => onChange(s, 'wifi')} />}
-      {active === 'vcard' && <VCardForm onChange={(s) => onChange(s, 'vcard')} />}
+      {active === 'url' && (
+        <UrlForm input={value.url} onChange={(url) => onChange({ ...value, url })} />
+      )}
+      {active === 'wifi' && (
+        <WifiForm input={value.wifi} onChange={(wifi) => onChange({ ...value, wifi })} />
+      )}
+      {active === 'vcard' && (
+        <VCardForm input={value.vcard} onChange={(vcard) => onChange({ ...value, vcard })} />
+      )}
     </div>
   );
 }
 
-function UrlForm({ onChange }: { onChange: (s: string) => void }) {
+function UrlForm({ input, onChange }: { input: UrlInput; onChange: (next: UrlInput) => void }) {
   const t = useDict().content.url;
   const locale = useLocale();
-  const [input, setInput] = useState<UrlInput>({ text: DEFAULT_CONFIG.data });
-
-  const update = (next: UrlInput) => {
-    setInput(next);
-    onChange(encodeUrl(next));
-  };
+  const update = onChange;
 
   return (
     <div>
@@ -81,19 +74,9 @@ function UrlForm({ onChange }: { onChange: (s: string) => void }) {
   );
 }
 
-function WifiForm({ onChange }: { onChange: (s: string) => void }) {
+function WifiForm({ input, onChange }: { input: WifiInput; onChange: (next: WifiInput) => void }) {
   const t = useDict().content.wifi;
-  const [input, setInput] = useState<WifiInput>({
-    ssid: '',
-    password: '',
-    encryption: 'WPA',
-    hidden: false,
-  });
-
-  const update = (next: WifiInput) => {
-    setInput(next);
-    onChange(encodeWifi(next));
-  };
+  const update = onChange;
 
   return (
     <div className="space-y-3">
@@ -150,22 +133,9 @@ function WifiForm({ onChange }: { onChange: (s: string) => void }) {
   );
 }
 
-function VCardForm({ onChange }: { onChange: (s: string) => void }) {
+function VCardForm({ input, onChange }: { input: VCardInput; onChange: (next: VCardInput) => void }) {
   const t = useDict().content.vcard;
-  const [input, setInput] = useState<VCardInput>({
-    firstName: '',
-    lastName: '',
-    organization: '',
-    title: '',
-    phone: '',
-    email: '',
-    url: '',
-  });
-
-  const update = (next: VCardInput) => {
-    setInput(next);
-    onChange(encodeVCard(next));
-  };
+  const update = onChange;
 
   const field = (key: keyof VCardInput) => (
     <div>
