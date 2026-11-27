@@ -44,7 +44,6 @@ export function CaptionedPreview({ config, caption, children }: Props) {
     [config.size, config.fgColor, config.bgColor, caption, ready],
   );
 
-  const t = layout.text;
   const pct = (n: number, of: number) => `${(n / of) * 100}%`;
 
   return (
@@ -72,16 +71,16 @@ export function CaptionedPreview({ config, caption, children }: Props) {
           viewBox={`0 0 ${layout.w} ${layout.h}`}
           aria-hidden="true"
         >
-          {layout.strip && (
-            <rect x={layout.strip.x} y={layout.strip.y} width={layout.strip.w} height={layout.strip.h} fill={layout.strip.color} />
-          )}
+          {layout.strips.map((s, i) => (
+            <rect key={i} x={s.x} y={s.y} width={s.w} height={s.h} fill={s.color} />
+          ))}
           {layout.framePath && (
             <path d={layout.framePath} fill={layout.frameColor} fillRule="evenodd" />
           )}
-          {t &&
+          {layout.blocks.map((t, b) =>
             t.lines.map((l, i) => (
               <text
-                key={i}
+                key={`${b}-${i}`}
                 x={t.x}
                 y={l.y}
                 textAnchor={t.anchor}
@@ -92,7 +91,8 @@ export function CaptionedPreview({ config, caption, children }: Props) {
               >
                 {l.str}
               </text>
-            ))}
+            )),
+          )}
         </svg>
       )}
     </div>
