@@ -275,6 +275,13 @@ function OverlayControls({
   const kind = overlay.kind;
 
   const handleFile = async (file: File) => {
+    if (file.type === 'image/svg+xml') {
+      // Keep the logo a vector. An SVG without width/height has no intrinsic
+      // size, so canvas drawImage renders it blank or blurry in some browsers.
+      const src = await svgToSizedDataUrl(file);
+      if (src) onChange({ kind: 'image', src });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const src = typeof reader.result === 'string' ? reader.result : '';
@@ -360,4 +367,30 @@ function OverlayControls({
       )}
     </div>
   );
+}
+
+/** Returns a data URL for the SVG with explicit width/height, or '' if it is not a valid SVG. */
+async function svgToSizedDataUrl(file: File): Promise<string> {
+  const doc = new DOMParser().parseFromString(await file.text(), 'image/svg+xml');
+  const root = doc.documentElement;
+  if (root.nodeName !== 'svg' || doc.querySelector('parsererror')) return '';
+  // Scripts and event handlers never run inside <img>, but strip them so the
+  // file stays inert if it is ever embedded in the downloaded SVG.
+  doc.querySelectorAll('script, foreignObject').forEach((el) => el.remove());
+  doc.querySelectorAll('*').forEach((el) => {
+    for (const attr of Array.from(el.attributes)) {
+      if (attr.name.toLowerCase().startsWith('on')) el.removeAttribute(attr.name);
+    }
+  });
+  const hasSize = (name: string) => /^[\d.]+(px)?$/.test(root.getAttribute(name) ?? '');
+  if (!hasSize('width') || !hasSize('height')) {
+    const [, , vbW, vbH] = (root.getAttribute('viewBox') ?? '').trim().split(/[\s,]+/).map(Number);
+    const width = vbW > 0 ? vbW : 512;
+    const height = vbH > 0 ? vbH : 512;
+    root.setAttribute('width', String(width));
+    root.setAttribute('height', String(height));
+    if (!root.getAttribute('viewBox')) root.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+  const xml = new XMLSerializer().serializeToString(root);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(xml)}`;
 }
