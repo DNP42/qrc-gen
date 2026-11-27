@@ -78,19 +78,21 @@ export function CaptionedPreview({ config, caption, children }: Props) {
           {layout.framePath && (
             <path d={layout.framePath} fill={layout.frameColor} fillRule="evenodd" />
           )}
-          {t && (
-            <text
-              x={t.x}
-              y={t.y}
-              textAnchor={t.anchor}
-              fontFamily={`${t.family}, sans-serif`}
-              fontWeight={t.weight}
-              fontSize={t.size}
-              fill={t.color}
-            >
-              {t.str}
-            </text>
-          )}
+          {t &&
+            t.lines.map((l, i) => (
+              <text
+                key={i}
+                x={t.x}
+                y={l.y}
+                textAnchor={t.anchor}
+                fontFamily={`${t.family}, sans-serif`}
+                fontWeight={t.weight}
+                fontSize={t.size}
+                fill={t.color}
+              >
+                {l.str}
+              </text>
+            ))}
         </svg>
       )}
     </div>

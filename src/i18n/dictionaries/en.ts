@@ -148,8 +148,8 @@ export const en = {
   caption: {
     title: 'Caption (optional)',
     text: 'Caption text',
-    placeholder: 'e.g. Kraljičina pesem',
-    hint: 'Drawn around the code, not encoded. Keep it short; long text is cut with an ellipsis.',
+    placeholder: 'e.g. Scan for the menu\nOpen daily 8–22',
+    hint: 'Drawn around the code, not encoded. Press Enter for a new line (up to 6 lines). A line that is too wide is cut with an ellipsis.',
     style: 'Label style',
     styles: { none: 'none', text: 'plain text', bar: 'bar' },
     position: 'Position',
