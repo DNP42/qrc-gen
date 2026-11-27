@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
+  activeFontIds,
   computeLayout,
-  isCaptionActive,
   loadCaptionFont,
   type CaptionConfig,
   type CaptionFontId,
@@ -16,32 +16,36 @@ interface Props {
   children: React.ReactNode;
 }
 
+/** Radius as a share of the box, so rounded corners keep their shape when the preview shrinks. */
+const percentRadius = (radius: number, w: number, h: number) =>
+  radius > 0 ? `${(radius / w) * 100}% / ${(radius / h) * 100}%` : undefined;
+
 /**
- * Positions the QR preview inside the caption layout and paints the caption
- * layer over it. The wrapper is always rendered, caption or not, so toggling
- * a caption never remounts (and so never blanks) the QR preview.
+ * Positions the QR preview inside the caption layout and paints the frame and
+ * text over it. The wrapper is always rendered, with or without text, so
+ * adding a title never remounts (and so never blanks) the QR preview.
  */
 export function CaptionedPreview({ config, caption, children }: Props) {
-  const active = isCaptionActive(caption);
-  // Font whose file has landed; the layout re-measures when it changes.
-  const [ready, setReady] = useState<CaptionFontId | null>(null);
+  const fontKey = activeFontIds(caption).join(',');
+  // Bumped when a font file has landed; the layout re-measures with the real font.
+  const [loaded, setLoaded] = useState(0);
 
   useEffect(() => {
-    if (!active) return;
+    if (!fontKey) return;
     let live = true;
-    loadCaptionFont(caption.font)
-      .then(() => live && setReady(caption.font))
+    Promise.all((fontKey.split(',') as CaptionFontId[]).map(loadCaptionFont))
+      .then(() => live && setLoaded((n) => n + 1))
       .catch(() => undefined);
     return () => {
       live = false;
     };
-  }, [active, caption.font]);
+  }, [fontKey]);
 
   const layout = useMemo(
     () => computeLayout(config, caption),
-    // `ready` forces a re-measure once the real font replaces the fallback.
+    // `loaded` forces a re-measure once the real font replaces the fallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.size, config.fgColor, config.bgColor, caption, ready],
+    [config.size, config.margin, config.fgColor, config.bgColor, caption, loaded],
   );
 
   const pct = (n: number, of: number) => `${(n / of) * 100}%`;
@@ -53,6 +57,11 @@ export function CaptionedPreview({ config, caption, children }: Props) {
         width: layout.w,
         aspectRatio: `${layout.w} / ${layout.h}`,
         filter: layout.framePath ? 'drop-shadow(0 0 14px rgba(57,255,122,0.16))' : undefined,
+        background: layout.plateColor ?? undefined,
+        borderRadius: layout.plateColor
+          ? percentRadius(layout.outerRadius, layout.w, layout.h)
+          : undefined,
+        overflow: layout.plateColor ? 'hidden' : undefined,
       }}
     >
       <div
@@ -61,6 +70,8 @@ export function CaptionedPreview({ config, caption, children }: Props) {
           left: pct(layout.qrX, layout.w),
           top: pct(layout.qrY, layout.h),
           width: pct(layout.qrSize, layout.w),
+          borderRadius: percentRadius(layout.qrRadius, layout.qrSize, layout.qrSize),
+          overflow: layout.qrRadius > 0 ? 'hidden' : undefined,
         }}
       >
         {children}
@@ -71,9 +82,6 @@ export function CaptionedPreview({ config, caption, children }: Props) {
           viewBox={`0 0 ${layout.w} ${layout.h}`}
           aria-hidden="true"
         >
-          {layout.strips.map((s, i) => (
-            <rect key={i} x={s.x} y={s.y} width={s.w} height={s.h} fill={s.color} />
-          ))}
           {layout.framePath && (
             <path d={layout.framePath} fill={layout.frameColor} fillRule="evenodd" />
           )}
