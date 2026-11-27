@@ -106,16 +106,8 @@ export const en = {
         title: 'Imprint',
         intro: 'Information about who runs this site.',
         sections: [
-          {
-            heading: 'Operator',
-            body: [
-              'Name: [operator name, to be completed by the owner]',
-              'Address: [postal address, to be completed by the owner]',
-              'Status: [for example sole trader or company, to be completed by the owner]',
-            ],
-          },
-          { heading: 'Contact', body: ['Email: [contact email, to be completed by the owner]'] },
-          { heading: 'Tax', body: ['VAT ID: [if applicable, to be completed by the owner]'] },
+          { heading: 'Operator', body: ['Name: donotpanic.space'] },
+          { heading: 'Contact', body: ['Email: hello@donotpanic.space'] },
           { heading: 'Hosting', body: ['Vercel Inc., USA.'] },
         ],
       },
@@ -156,10 +148,6 @@ export const en = {
           {
             heading: 'Affiliate links',
             body: ['Some links may be affiliate links. As an Amazon Associate we earn from qualifying purchases.'],
-          },
-          {
-            heading: 'Governing law',
-            body: ['These terms are governed by the law of [country of the operator, to be completed by the owner].'],
           },
         ],
       },

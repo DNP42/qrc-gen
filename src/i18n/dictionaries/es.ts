@@ -97,16 +97,8 @@ export const es: Dictionary = {
         title: 'Aviso legal',
         intro: 'Información sobre quién gestiona este sitio.',
         sections: [
-          {
-            heading: 'Responsable',
-            body: [
-              'Nombre: [nombre del responsable, a completar por el propietario]',
-              'Dirección: [dirección postal, a completar por el propietario]',
-              'Condición: [por ejemplo autónomo o empresa, a completar por el propietario]',
-            ],
-          },
-          { heading: 'Contacto', body: ['Correo electrónico: [correo de contacto, a completar por el propietario]'] },
-          { heading: 'Impuestos', body: ['NIF-IVA: [si procede, a completar por el propietario]'] },
+          { heading: 'Responsable', body: ['Nombre: donotpanic.space'] },
+          { heading: 'Contacto', body: ['Correo electrónico: hello@donotpanic.space'] },
           { heading: 'Alojamiento', body: ['Vercel Inc., EE. UU.'] },
         ],
       },
@@ -147,10 +139,6 @@ export const es: Dictionary = {
           {
             heading: 'Enlaces de afiliado',
             body: ['Algunos enlaces pueden ser de afiliado. Como afiliados de Amazon, ganamos con las compras que cumplen los requisitos.'],
-          },
-          {
-            heading: 'Ley aplicable',
-            body: ['Estos términos se rigen por la ley de [país del responsable, a completar por el propietario].'],
           },
         ],
       },

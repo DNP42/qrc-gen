@@ -96,16 +96,8 @@ export const sl: Dictionary = {
         title: 'Impresum',
         intro: 'Podatki o tem, kdo upravlja to stran.',
         sections: [
-          {
-            heading: 'Upravljavec',
-            body: [
-              'Ime: [ime upravljavca, dopolni lastnik]',
-              'Naslov: [poštni naslov, dopolni lastnik]',
-              'Status: [na primer samostojni podjetnik ali podjetje, dopolni lastnik]',
-            ],
-          },
-          { heading: 'Stik', body: ['E-pošta: [kontaktna e-pošta, dopolni lastnik]'] },
-          { heading: 'Davki', body: ['ID za DDV: [če obstaja, dopolni lastnik]'] },
+          { heading: 'Upravljavec', body: ['Ime: donotpanic.space'] },
+          { heading: 'Stik', body: ['E-pošta: hello@donotpanic.space'] },
           { heading: 'Gostovanje', body: ['Vercel Inc., ZDA.'] },
         ],
       },
@@ -146,10 +138,6 @@ export const sl: Dictionary = {
           {
             heading: 'Partnerske povezave',
             body: ['Nekatere povezave so lahko partnerske. Kot partner Amazona zaslužimo z upravičenimi nakupi.'],
-          },
-          {
-            heading: 'Veljavno pravo',
-            body: ['Za te pogoje velja pravo [država upravljavca, dopolni lastnik].'],
           },
         ],
       },
