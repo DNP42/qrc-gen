@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   activeFontIds,
   computeLayout,
+  layoutInput,
   loadCaptionFont,
   type CaptionConfig,
   type CaptionFontId,
@@ -42,7 +43,7 @@ export function CaptionedPreview({ config, caption, children }: Props) {
   }, [fontKey]);
 
   const layout = useMemo(
-    () => computeLayout(config, caption),
+    () => computeLayout(layoutInput(config), caption),
     // `loaded` forces a re-measure once the real font replaces the fallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.size, config.margin, config.fgColor, config.bgColor, caption, loaded],

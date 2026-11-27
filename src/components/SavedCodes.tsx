@@ -62,7 +62,9 @@ export function SavedCodes({ content, config, caption, defaultName, onLoad }: Pr
         data: encodeContent(content),
         overlay: overlay.kind === 'image' ? { kind: 'image', src: logo } : overlay,
       };
-      const thumb = await makeThumbnail(storedConfig, caption);
+      // The thumbnail is an image of the QR, so it must not carry the Wi-Fi password either.
+      const publicContent = { ...content, wifi: { ...content.wifi, password: '' } };
+      const thumb = await makeThumbnail({ ...storedConfig, data: encodeContent(publicContent) }, caption);
       const record = createSavedCode({
         id: crypto.randomUUID(),
         name: name.trim() || defaultName,

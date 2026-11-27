@@ -8,7 +8,7 @@
  * and the SVG (string), so all three match.
  */
 import QRCodeStyling from 'qr-code-styling';
-import { buildOptions, textToImage, type QRConfig } from '@/lib/qr';
+import { buildOptions, clampMargin, textToImage, type QRConfig } from '@/lib/qr';
 
 export type FrameStyle = 'bar' | 'plain';
 export type CaptionAlign = 'left' | 'center' | 'right';
@@ -199,7 +199,18 @@ export function roundedRectPath(x: number, y: number, w: number, h: number, radi
   );
 }
 
+/** `margin` is the quiet zone actually drawn (see layoutInput), in the same pixels as `size`. */
 type LayoutInput = Pick<QRConfig, 'size' | 'margin' | 'fgColor' | 'bgColor'>;
+
+/** Layout input for a config rendered at `scale` x: the clamped margin buildOptions() really draws. */
+export function layoutInput(config: QRConfig, scale = 1): LayoutInput {
+  return {
+    size: config.size * scale,
+    margin: clampMargin(config.margin, config.size) * scale,
+    fgColor: config.fgColor,
+    bgColor: config.bgColor,
+  };
+}
 
 export function computeLayout(qr: LayoutInput, cap: CaptionConfig): CaptionLayout {
   const size = qr.size;
@@ -213,7 +224,6 @@ export function computeLayout(qr: LayoutInput, cap: CaptionConfig): CaptionLayou
   const bar = cap.frame.style === 'bar';
   // The corner is capped by the quiet zone, so rounding never cuts a finder pattern.
   const qrRadius = Math.min(Math.round(cap.frame.innerRadius * k), Math.max(0, qr.margin));
-  const outerRadius = Math.round(cap.frame.outerRadius * k);
 
   const sections = [cap.title, cap.caption].map((block) => ({
     block,
@@ -230,6 +240,10 @@ export function computeLayout(qr: LayoutInput, cap: CaptionConfig): CaptionLayou
 
   // The bar keeps a thin border on a side that has no text.
   const b = bar ? Math.round(14 * k) : 0;
+  // On the bar, a corner larger than this would put the QR window's corner outside
+  // the rounded outline and paint the bar over the code. (3.414 = 1 / (1 - 1/sqrt 2) * 1/sqrt 2.)
+  const outerLimit = bar ? Math.floor(3.414 * b + qrRadius) : Number.POSITIVE_INFINITY;
+  const outerRadius = Math.min(Math.round(cap.frame.outerRadius * k), outerLimit);
   const w = size + 2 * b;
   const padX = bar ? b + Math.round(8 * k) : Math.round(12 * k);
   const qrY = topH || b;
@@ -309,10 +323,7 @@ function toBase64(buf: ArrayBuffer): string {
  */
 export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promise<Blob> {
   await Promise.all(activeFontIds(cap).map(loadCaptionFont));
-  const layout = computeLayout(
-    { ...config, size: config.size * EXPORT_SCALE, margin: config.margin * EXPORT_SCALE },
-    cap,
-  );
+  const layout = computeLayout(layoutInput(config, EXPORT_SCALE), cap);
   const blob = (await rawQr(config, 'canvas', EXPORT_SCALE).getRawData('png')) as Blob | null;
   if (!blob) throw new Error('QR render failed');
   const bmp = await createImageBitmap(blob);
@@ -328,6 +339,10 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
     ctx.fill(new Path2D(roundedRectPath(0, 0, layout.w, layout.h, layout.outerRadius)));
   }
   ctx.save();
+  // The QR never shows outside the sign, whatever the two radii are.
+  if (layout.plateColor) {
+    ctx.clip(new Path2D(roundedRectPath(0, 0, layout.w, layout.h, layout.outerRadius)));
+  }
   if (layout.qrRadius > 0) {
     ctx.clip(new Path2D(roundedRectPath(layout.qrX, layout.qrY, layout.qrSize, layout.qrSize, layout.qrRadius)));
   }
@@ -353,7 +368,7 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
 export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promise<Blob> {
   const fontIds = activeFontIds(cap);
   const fontBufs = await Promise.all(fontIds.map(loadCaptionFont));
-  const layout = computeLayout(config, cap);
+  const layout = computeLayout(layoutInput(config), cap);
   const blob = (await rawQr(config, 'svg').getRawData('svg')) as Blob | null;
   if (!blob) throw new Error('QR render failed');
   const doc = new DOMParser().parseFromString(await blob.text(), 'image/svg+xml');
@@ -368,9 +383,13 @@ export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promis
     return `@font-face{font-family:"${font.family}";font-weight:${font.weight};src:url(data:font/woff2;base64,${toBase64(fontBufs[i])}) format("woff2")}`;
   });
   const clipId = 'qrc-qr-clip';
+  const plateClipId = 'qrc-plate-clip';
   const clipped = layout.qrRadius > 0;
   parts.push(
     `<defs>${defs.length ? `<style>${defs.join('')}</style>` : ''}` +
+      (layout.plateColor
+        ? `<clipPath id="${plateClipId}"><rect width="${layout.w}" height="${layout.h}" rx="${layout.outerRadius}" ry="${layout.outerRadius}"/></clipPath>`
+        : '') +
       (clipped
         ? `<clipPath id="${clipId}"><rect x="${layout.qrX}" y="${layout.qrY}" width="${layout.qrSize}" height="${layout.qrSize}" rx="${layout.qrRadius}" ry="${layout.qrRadius}"/></clipPath>`
         : '') +
@@ -378,17 +397,18 @@ export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promis
   );
   if (layout.plateColor) {
     parts.push(
-      `<rect width="${layout.w}" height="${layout.h}" rx="${layout.outerRadius}" ry="${layout.outerRadius}" fill="${layout.plateColor}"/>`,
+      `<rect width="${layout.w}" height="${layout.h}" rx="${layout.outerRadius}" ry="${layout.outerRadius}" fill="${escapeXml(layout.plateColor)}"/>`,
     );
   }
-  parts.push(clipped ? `<g clip-path="url(#${clipId})">${qrMarkup}</g>` : qrMarkup);
+  const qrPart = clipped ? `<g clip-path="url(#${clipId})">${qrMarkup}</g>` : qrMarkup;
+  parts.push(layout.plateColor ? `<g clip-path="url(#${plateClipId})">${qrPart}</g>` : qrPart);
   if (layout.framePath) {
-    parts.push(`<path d="${layout.framePath}" fill="${layout.frameColor}" fill-rule="evenodd"/>`);
+    parts.push(`<path d="${layout.framePath}" fill="${escapeXml(layout.frameColor)}" fill-rule="evenodd"/>`);
   }
   for (const t of layout.blocks) {
     for (const l of t.lines) {
       parts.push(
-        `<text x="${t.x}" y="${l.y}" text-anchor="${t.anchor}" font-family="${t.family}, sans-serif" font-weight="${t.weight}" font-size="${t.size}" fill="${t.color}">${escapeXml(l.str)}</text>`,
+        `<text x="${t.x}" y="${l.y}" text-anchor="${t.anchor}" font-family="${t.family}, sans-serif" font-weight="${t.weight}" font-size="${t.size}" fill="${escapeXml(t.color)}">${escapeXml(l.str)}</text>`,
       );
     }
   }

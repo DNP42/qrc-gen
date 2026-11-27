@@ -6,9 +6,17 @@
  * defaults key by key and every value is checked before it can reach the
  * renderer.
  */
-import { DEFAULT_CAPTION, type CaptionConfig } from '@/lib/caption';
+import {
+  CAPTION_SIZE_MAX,
+  DEFAULT_CAPTION,
+  FONT_SIZE_MIN,
+  RADIUS_MAX,
+  RADIUS_MIN,
+  TITLE_SIZE_MAX,
+  type CaptionConfig,
+} from '@/lib/caption';
 import { CONTENT_TYPES, DEFAULT_CONTENT, type ContentState } from '@/lib/content';
-import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
+import { DEFAULT_CONFIG, IMAGE_MARGIN_MAX, IMAGE_MARGIN_MIN, clampMargin, type QRConfig } from '@/lib/qr';
 
 export const STORAGE_KEY = 'qrc-gen:codes:v1';
 export const MAX_CODES = 20;
@@ -138,6 +146,10 @@ function sanitizeOverlay(value: unknown): QRConfig['overlay'] {
   return { kind: 'none' };
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
 function parseSavedCode(value: unknown): SavedCode | null {
   if (!isRecord(value)) return null;
   const { id, name, createdAt, thumb } = value;
@@ -149,8 +161,20 @@ function parseSavedCode(value: unknown): SavedCode | null {
   const rawDesign = isRecord(value.design) ? value.design : {};
   design.overlay = sanitizeOverlay(rawDesign.overlay);
 
+  // The UI has no size control, and stored numbers are only ranges to check, so pin
+  // them to what the controls allow: a hostile file must not ask for a huge canvas.
+  design.size = DEFAULT_CONFIG.size;
+  design.margin = clampMargin(design.margin, design.size);
+  design.imageMargin = clamp(design.imageMargin, IMAGE_MARGIN_MIN, IMAGE_MARGIN_MAX);
+
   const content = sanitize(DEFAULT_CONTENT, value.content, 'content');
   content.wifi.password = '';
+
+  const caption = sanitize(DEFAULT_CAPTION, value.caption, 'caption');
+  caption.title.size = clamp(caption.title.size, FONT_SIZE_MIN, TITLE_SIZE_MAX);
+  caption.caption.size = clamp(caption.caption.size, FONT_SIZE_MIN, CAPTION_SIZE_MAX);
+  caption.frame.outerRadius = clamp(caption.frame.outerRadius, RADIUS_MIN, RADIUS_MAX);
+  caption.frame.innerRadius = clamp(caption.frame.innerRadius, RADIUS_MIN, RADIUS_MAX);
 
   return {
     id: id.slice(0, 80),
@@ -159,7 +183,7 @@ function parseSavedCode(value: unknown): SavedCode | null {
     thumb: typeof thumb === 'string' && thumb.startsWith('data:image/') && thumb.length < 60_000 ? thumb : '',
     content,
     design,
-    caption: sanitize(DEFAULT_CAPTION, value.caption, 'caption'),
+    caption,
   };
 }
 
