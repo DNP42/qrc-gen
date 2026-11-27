@@ -5,21 +5,21 @@ import type { Dictionary } from './en';
  */
 export const sl: Dictionary = {
   meta: {
-    title: 'qrc-gen — QR kode iz praznine',
+    title: 'qrc-gen — Brezplačen generator QR kod',
     description:
-      'Brezplačen generator QR kod. Povezave, Wi-Fi, vizitke. Po želji logotip ali besedilo na sredini. Brez računov, brez sledenja, brez nakladanja.',
-    ogDescription: 'Brezplačen generator QR kod. Brez računov, brez sledenja, brez nakladanja.',
+      'Brezplačen generator QR kod. Povezave, Wi-Fi, vizitke. Po želji logotip ali besedilo na sredini. Brez računov. Brez sledenja.',
+    ogDescription: 'Brezplačen generator QR kod. Brez računov. Brez sledenja.',
   },
   header: {
-    tagline: 'QR kode iz praznine',
+    tagline: 'Brezplačen generator QR kod',
     github: 'github →',
     language: 'Jezik',
   },
   hero: {
     title: 'Ustvari QR kode.',
-    titleMuted: 'Brez računov. Brez sledenja. Brez nakladanja.',
+    titleMuted: 'Brez računov. Brez sledenja. Brez zbiranja podatkov.',
     intro:
-      'Za povezave, Wi-Fi omrežja in vizitke. Dodaj logotip ali besedilo na sredino — popravljanje napak se samodejno okrepi, da se koda še vedno prebere. Ven prideta PNG in SVG.',
+      'Za povezave, Wi-Fi omrežja in vizitke. Dodaj logotip ali besedilo na sredino. Popravljanje napak se samodejno okrepi, da se koda še vedno prebere. Izhod: PNG in SVG.',
   },
   cards: {
     content: 'Vsebina',
@@ -28,18 +28,18 @@ export const sl: Dictionary = {
     export: 'Izvoz',
   },
   preview: {
-    loading: 'zaganjam matrico…',
+    loading: 'Generiram…',
   },
   footer: {
-    builtBy: 'zgrajeno v praznini · odprta koda · vajb:',
+    builtBy: 'Odprta koda · ustvaril',
     poweredBy: 'poganja',
     home: 'donotpanic.space',
     source: 'izvorna koda →',
-    kofi: '☕ Za vedno zastonj. Častiš kavo?',
+    kofi: 'Za vedno zastonj. Podpri projekt',
   },
   notFound: {
-    heading: 'Signala ni.',
-    body: 'Te strani ni. Praznino smo preverili dvakrat.',
+    heading: 'Stran ni najdena.',
+    body: 'Stran, ki ste jo zahtevali, ne obstaja.',
     back: 'nazaj na generator →',
   },
   content: {
@@ -91,7 +91,7 @@ export const sl: Dictionary = {
     cornerSquares: 'Kotni kvadrati',
     cornerDots: 'Kotne pike',
     padding: 'Odmik',
-    paddingHint: 'Tiha cona okoli kode. Pretesno, pa telefon obupa.',
+    paddingHint: 'Tiha cona okoli kode. Premajhna vrednost otežuje skeniranje.',
     paddingValue: '{n} px',
     overlay: 'Prekrivni sloj (neobvezno)',
     presets: {
@@ -127,22 +127,54 @@ export const sl: Dictionary = {
     chooseImage: 'Izberi sliko…',
     overlayPreviewAlt: 'predogled prekrivne slike',
     clear: 'počisti',
-    textPlaceholder: 'živjo (do 6 znakov)',
+    textPlaceholder: 'besedilo (do 6 znakov)',
     textHint: 'Narisano čez sredino kode. Popravljanje napak samodejno skoči na H.',
+    gradient: 'Prelivanje',
+    gradientOn: 'uporabi prelivanje',
+    gradientFrom: 'Od',
+    gradientTo: 'Do',
+    gradientTypes: { linear: 'linearno', radial: 'radialno' },
+    gradientHint: 'Obe barvi naj bosta jasno temnejši ali svetlejši od ozadja, sicer se koda ne skenira.',
+    imageMargin: 'Rob logotipa',
     noneHint: 'Gola QR koda. Najgostejši zapis, najhitrejše skeniranje.',
   },
+  caption: {
+    title: 'Napis (po želji)',
+    text: 'Besedilo napisa',
+    placeholder: 'npr. Skeniraj za meni\nOdprto vsak dan 8–22',
+    hint: 'Nariše se ob kodi, ni zapisano vanjo. Enter naredi novo vrstico (do 6 vrstic). Preširoka vrstica se skrajša s tremi pikami.',
+    style: 'Slog napisa',
+    styles: { none: 'brez', text: 'navadno besedilo', bar: 'trak' },
+    position: 'Položaj',
+    positions: { above: 'nad kodo', below: 'pod kodo' },
+    align: 'Poravnava',
+    aligns: { left: 'levo', center: 'sredina', right: 'desno' },
+    font: 'Pisava',
+    fontSize: 'Velikost pisave',
+    fontSizeValue: '{n} px',
+    barColor: 'Barva traku',
+    textColor: 'Barva besedila',
+    resetColors: 'barve kode QR',
+  },
   affiliates: {
-    heading: 'Zabava s QR kodami?',
-    blurb: 'Natiskaj svojo na nalepke ali etikete.',
-    products: {
-      qrStickerPaper: 'nalepke za QR kode →',
-      },
-    disclosure: 'Kot Amazonov partner zaslužim pri kvalificiranih nakupih.',
+    heading: 'Natisni svojo QR kodo',
+    blurb: 'Oprema za tisk in prikaz QR kod.',
+    disclosure: 'Kot Amazonov partner zaslužimo pri kvalificiranih nakupih.',
+  },
+  moreFrom: {
+    heading: 'Več od DoNotPanic',
+    links: {
+      hub: { label: 'Spletna stran + DNS', note: 'Plačljiva postavitev strani in domene.' },
+      links: { label: 'Povezave', note: 'Vsi projekti DoNotPanic na enem mestu.' },
+      dj: { label: 'DJ', note: 'Glasba in miksi.' },
+      qttt: { label: 'Kvantni križci in krožci', note: 'Igra za igranje.' },
+    },
   },
   download: {
     filename: 'Ime datoteke',
     png: 'Prenesi PNG',
     svg: 'Prenesi SVG',
+    captionError: 'Datoteke z napisom ni bilo mogoče izdelati. Poskusi znova.',
     defaultNames: {
       url: 'qr-koda',
       wifi: 'wifi-qr',

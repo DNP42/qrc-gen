@@ -4,6 +4,8 @@ import { useDict } from '@/i18n/I18nProvider';
 import type { Dictionary } from '@/i18n/dictionaries/en';
 import { interpolate } from '@/i18n/format';
 import {
+  IMAGE_MARGIN_MAX,
+  IMAGE_MARGIN_MIN,
   MARGIN_MAX,
   MARGIN_MIN,
   clampMargin,
@@ -82,6 +84,41 @@ export function StylePanel({ config, onChange }: Props) {
         </div>
       </Section>
 
+      <Section title={t.gradient}>
+        <label className="flex items-center gap-2 font-mono text-xs text-[var(--foreground)] cursor-pointer min-h-8">
+          <input
+            type="checkbox"
+            checked={config.gradient.enabled}
+            onChange={(e) => update({ gradient: { ...config.gradient, enabled: e.target.checked } })}
+            className="w-4 h-4 accent-[var(--hawk)]"
+          />
+          {t.gradientOn}
+        </label>
+        {config.gradient.enabled && (
+          <div className="mt-3 space-y-3">
+            <Pills
+              options={['linear', 'radial'] as const}
+              labels={t.gradientTypes}
+              value={config.gradient.type}
+              onChange={(type) => update({ gradient: { ...config.gradient, type } })}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <ColorPick
+                label={t.gradientFrom}
+                value={config.gradient.from}
+                onChange={(from) => update({ gradient: { ...config.gradient, from } })}
+              />
+              <ColorPick
+                label={t.gradientTo}
+                value={config.gradient.to}
+                onChange={(to) => update({ gradient: { ...config.gradient, to } })}
+              />
+            </div>
+            <p className="font-mono text-xs text-[var(--muted)]">{t.gradientHint}</p>
+          </div>
+        )}
+      </Section>
+
       <Section title={t.dotStyle}>
         <Pills
           options={DOT_STYLES}
@@ -130,6 +167,26 @@ export function StylePanel({ config, onChange }: Props) {
 
       <Section title={t.overlay}>
         <OverlayControls overlay={config.overlay} onChange={(overlay) => update({ overlay })} />
+        {config.overlay.kind !== 'none' && (
+          <div className="mt-3">
+            <div className="label">{t.imageMargin}</div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                className="range min-w-0 flex-1"
+                min={IMAGE_MARGIN_MIN}
+                max={IMAGE_MARGIN_MAX}
+                step={1}
+                value={config.imageMargin}
+                aria-label={t.imageMargin}
+                onChange={(e) => update({ imageMargin: Number(e.target.value) })}
+              />
+              <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
+                {interpolate(t.paddingValue, { n: config.imageMargin })}
+              </span>
+            </div>
+          </div>
+        )}
       </Section>
     </div>
   );
@@ -144,7 +201,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Pills<T extends string>({
+export function Pills<T extends string>({
   options,
   labels,
   value,
@@ -175,7 +232,7 @@ function Pills<T extends string>({
   );
 }
 
-function ColorPick({
+export function ColorPick({
   label,
   value,
   onChange,
@@ -218,6 +275,13 @@ function OverlayControls({
   const kind = overlay.kind;
 
   const handleFile = async (file: File) => {
+    if (file.type === 'image/svg+xml') {
+      // Keep the logo a vector. An SVG without width/height has no intrinsic
+      // size, so canvas drawImage renders it blank or blurry in some browsers.
+      const src = await svgToSizedDataUrl(file);
+      if (src) onChange({ kind: 'image', src });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const src = typeof reader.result === 'string' ? reader.result : '';
@@ -303,4 +367,30 @@ function OverlayControls({
       )}
     </div>
   );
+}
+
+/** Returns a data URL for the SVG with explicit width/height, or '' if it is not a valid SVG. */
+async function svgToSizedDataUrl(file: File): Promise<string> {
+  const doc = new DOMParser().parseFromString(await file.text(), 'image/svg+xml');
+  const root = doc.documentElement;
+  if (root.nodeName !== 'svg' || doc.querySelector('parsererror')) return '';
+  // Scripts and event handlers never run inside <img>, but strip them so the
+  // file stays inert if it is ever embedded in the downloaded SVG.
+  doc.querySelectorAll('script, foreignObject').forEach((el) => el.remove());
+  doc.querySelectorAll('*').forEach((el) => {
+    for (const attr of Array.from(el.attributes)) {
+      if (attr.name.toLowerCase().startsWith('on')) el.removeAttribute(attr.name);
+    }
+  });
+  const hasSize = (name: string) => /^[\d.]+(px)?$/.test(root.getAttribute(name) ?? '');
+  if (!hasSize('width') || !hasSize('height')) {
+    const [, , vbW, vbH] = (root.getAttribute('viewBox') ?? '').trim().split(/[\s,]+/).map(Number);
+    const width = vbW > 0 ? vbW : 512;
+    const height = vbH > 0 ? vbH : 512;
+    root.setAttribute('width', String(width));
+    root.setAttribute('height', String(height));
+    if (!root.getAttribute('viewBox')) root.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+  const xml = new XMLSerializer().serializeToString(root);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(xml)}`;
 }

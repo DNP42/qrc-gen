@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/",
+        has: [{ type: "header", key: "accept-language", value: "[eE][sS](?:[-;,].*)?" }],
+        destination: "/es",
+        permanent: false,
+      },
+      {
+        source: "/",
         destination: "/en",
         permanent: false,
       },

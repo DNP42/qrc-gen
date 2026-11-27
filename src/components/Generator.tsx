@@ -4,11 +4,15 @@ import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 import { ContentTabs, type ContentType } from '@/components/ContentTabs';
 import { StylePanel } from '@/components/StylePanel';
+import { CaptionPanel } from '@/components/CaptionPanel';
+import { CaptionedPreview } from '@/components/CaptionedPreview';
 import { DownloadBar } from '@/components/DownloadBar';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
 import { AffiliateBlock } from '@/components/AffiliateBlock';
+import { MoreFrom } from '@/components/MoreFrom';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
+import { DEFAULT_CAPTION, type CaptionConfig } from '@/lib/caption';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
 
 const QRPreview = dynamic(
@@ -22,6 +26,7 @@ const QRPreview = dynamic(
 export function Generator() {
   const t = useDict();
   const [config, setConfig] = useState<QRConfig>(DEFAULT_CONFIG);
+  const [caption, setCaption] = useState<CaptionConfig>(DEFAULT_CAPTION);
   const [contentType, setContentType] = useState<ContentType>('url');
   const previewRef = useRef<QRPreviewHandle | null>(null);
 
@@ -40,7 +45,7 @@ export function Generator() {
             <h1 className="font-mono text-lg text-[var(--hawk)] hawk-glow scanline">
               qrc-gen
             </h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mt-1">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--muted)] mt-1">
               {t.header.tagline}
             </p>
           </div>
@@ -78,21 +83,28 @@ export function Generator() {
             <Card title={t.cards.style}>
               <StylePanel config={config} onChange={setConfig} />
             </Card>
+
+            <Card title={t.caption.title}>
+              <CaptionPanel config={config} caption={caption} onChange={setCaption} />
+            </Card>
           </div>
 
           <div className="min-w-0 w-full space-y-6 lg:sticky lg:top-6 lg:self-start">
             <Card title={t.cards.preview}>
-              <QRPreview config={config} ref={previewRef} />
+              <CaptionedPreview config={config} caption={caption}>
+                <QRPreview config={config} ref={previewRef} />
+              </CaptionedPreview>
             </Card>
 
             <Card title={t.cards.export}>
-              <DownloadBar previewRef={previewRef} defaultName={filename} />
+              <DownloadBar previewRef={previewRef} defaultName={filename} config={config} caption={caption} />
             </Card>
           </div>
         </div>
       </main>
 
       <AffiliateBlock />
+      <MoreFrom />
 
       <footer className="border-t border-[var(--border)] mt-10">
         <div className="max-w-6xl mx-auto px-6 py-6 font-mono text-xs text-[var(--muted)] flex flex-wrap gap-4 justify-between">
@@ -156,7 +168,7 @@ function PreviewLoading() {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
+      <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
         {title}
       </h3>
       {children}

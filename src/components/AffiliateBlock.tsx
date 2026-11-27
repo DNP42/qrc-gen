@@ -1,37 +1,50 @@
-'use client';
+import items from '@/config/affiliates.json';
+import { useDict } from '@/i18n/I18nProvider';
 
-import {
-  affiliateProducts,
-  amazonUrl,
-  isLive,
-} from '@/config/affiliates';
-import { useDict, useLocale } from '@/i18n/I18nProvider';
+interface AffiliateItem {
+  name: string;
+  url: string;
+  image: string;
+  note: string;
+  enabled: boolean;
+}
 
 /**
- * Single, unobtrusive affiliate card. The only monetized element on the site —
- * all copy comes from the i18n dictionaries, all links from affiliates.ts.
+ * Data-driven product slots. Edit src/config/affiliates.json; nothing renders
+ * (and no disclosure shows) until at least one item has enabled: true.
  */
 export function AffiliateBlock() {
   const t = useDict();
-  const locale = useLocale();
-  const product = affiliateProducts[0];
+  const live = (items as AffiliateItem[]).filter((i) => i.enabled && i.url);
 
-  if (!product || !isLive(product, locale)) return null;
+  if (live.length === 0) return null;
 
   return (
     <aside className="max-w-6xl w-full mx-auto px-6 pb-2">
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 font-mono text-xs text-[var(--muted)] flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <span className="uppercase tracking-[0.2em]">{t.affiliates.heading}</span>
-        <span>{t.affiliates.blurb}</span>
-        <a
-          href={amazonUrl(product, locale)}
-          target="_blank"
-          rel="sponsored noopener"
-          className="text-[var(--muted)] hover:text-[var(--hawk)] transition-colors"
-        >
-          {t.affiliates.products[product.key]}
-        </a>
-        <span className="text-[10px]">{t.affiliates.disclosure}</span>
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 font-mono text-xs text-[var(--muted)]">
+        <h3 className="uppercase tracking-[0.2em] mb-1">{t.affiliates.heading}</h3>
+        <p className="mb-4">{t.affiliates.blurb}</p>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {live.map((item) => (
+            <li key={item.url}>
+              <a
+                href={item.url}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                className="flex items-center gap-3 rounded-lg border border-[var(--border)] p-3 min-h-8 hover:border-[var(--hawk)] transition-colors"
+              >
+                {item.image && (
+                  <img src={item.image} alt="" className="w-12 h-12 object-contain rounded bg-white" />
+                )}
+                <span>
+                  <span className="block text-[var(--foreground)]">{item.name}</span>
+                  <span className="block">{item.note}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4">{t.affiliates.disclosure}</p>
       </div>
     </aside>
   );

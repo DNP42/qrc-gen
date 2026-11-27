@@ -20,7 +20,22 @@ export interface QRConfig {
   cornerSquareStyle: CornerSquareStyle;
   cornerDotStyle: CornerDotStyle;
   overlay: Overlay;
+  /** Optional two-color gradient that replaces `fgColor` on dots and corners. */
+  gradient: GradientConfig;
+  /** Gap in pixels between the center image and the dots around it. */
+  imageMargin: number;
 }
+
+export interface GradientConfig {
+  enabled: boolean;
+  type: 'linear' | 'radial';
+  from: string;
+  to: string;
+}
+
+export const IMAGE_MARGIN_MIN = 0;
+export const IMAGE_MARGIN_MAX = 20;
+export const IMAGE_MARGIN_DEFAULT = 6;
 
 /** Slider bounds. The max is a quarter of the default canvas, so the matrix still has room. */
 export const MARGIN_MIN = 0;
@@ -41,6 +56,8 @@ export const DEFAULT_CONFIG: QRConfig = {
   cornerSquareStyle: 'extra-rounded',
   cornerDotStyle: 'dot',
   overlay: { kind: 'none' },
+  gradient: { enabled: false, type: 'linear', from: '#39FF7A', to: '#00E5FF' },
+  imageMargin: IMAGE_MARGIN_DEFAULT,
 };
 
 /** Keep the quiet zone inside the canvas. A margin of size/2 leaves nothing to draw. */
@@ -59,6 +76,20 @@ export function clampMargin(margin: number, size: number): number {
  */
 export function buildOptions(config: QRConfig, image?: string): Options {
   const hasOverlay = config.overlay.kind !== 'none';
+  // Opt-in: with the gradient off the options are exactly the solid-color ones.
+  const g = config.gradient;
+  const fill = g.enabled
+    ? {
+        gradient: {
+          type: g.type,
+          rotation: Math.PI / 4,
+          colorStops: [
+            { offset: 0, color: g.from },
+            { offset: 1, color: g.to },
+          ],
+        },
+      }
+    : {};
 
   return {
     width: config.size,
@@ -73,11 +104,12 @@ export function buildOptions(config: QRConfig, image?: string): Options {
     imageOptions: {
       hideBackgroundDots: true,
       imageSize: 0.35,
-      margin: 6,
+      margin: Math.min(IMAGE_MARGIN_MAX, Math.max(IMAGE_MARGIN_MIN, Math.round(config.imageMargin))),
       crossOrigin: 'anonymous',
     },
     dotsOptions: {
       color: config.fgColor,
+      ...fill,
       type: config.dotStyle,
     },
     backgroundOptions: {
@@ -85,10 +117,12 @@ export function buildOptions(config: QRConfig, image?: string): Options {
     },
     cornersSquareOptions: {
       color: config.fgColor,
+      ...fill,
       type: config.cornerSquareStyle,
     },
     cornersDotOptions: {
       color: config.fgColor,
+      ...fill,
       type: config.cornerDotStyle,
     },
   };
