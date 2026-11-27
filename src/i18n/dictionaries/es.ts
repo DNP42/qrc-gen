@@ -42,6 +42,107 @@ export const es: Dictionary = {
     source: 'código →',
     kofi: 'Gratis para siempre. Apoya el proyecto',
   },
+  legal: {
+    back: '← volver al generador',
+    navLabel: 'Legal',
+    nav: { privacy: 'Privacidad', imprint: 'Aviso legal', terms: 'Términos' },
+    updated: 'Última actualización: {date}',
+    pages: {
+      privacy: {
+        title: 'Política de privacidad',
+        intro:
+          'qrc-gen es una herramienta gratuita. No te pide iniciar sesión y no recopila tus datos. Esta página explica lo que ocurre de todos modos.',
+        sections: [
+          {
+            heading: 'Lo que se queda en tu navegador',
+            body: [
+              'Todo lo que escribes (enlaces, datos de Wi-Fi, datos de contacto, títulos, leyendas, logotipos) se convierte en un código QR dentro de tu navegador. Nunca se envía a un servidor.',
+              'Las fuentes de los títulos y las leyendas se sirven desde este sitio, no desde un tercero.',
+            ],
+          },
+          {
+            heading: 'Cookies y almacenamiento',
+            body: [
+              'Este sitio no instala cookies y no usa herramientas de analítica, publicidad ni seguimiento. Por eso no muestra un aviso de cookies.',
+            ],
+          },
+          {
+            heading: 'Alojamiento',
+            body: [
+              'Este sitio está alojado en Vercel. Cuando abres una página, los servidores de Vercel tratan datos técnicos como tu dirección IP, el tipo de navegador y la hora de la solicitud, para entregar el sitio y mantenerlo seguro. El responsable usa estos datos solo para operar y proteger el sitio. Base jurídica: interés legítimo en mantener un sitio web seguro (art. 6.1.f RGPD).',
+            ],
+          },
+          {
+            heading: 'Enlaces a otros sitios',
+            body: [
+              'El sitio enlaza con GitHub, Ko-fi y otras páginas de DoNotPanic y, cuando se muestran, con Amazon. Al seguir un enlace sales de este sitio y se aplica la política de privacidad del otro sitio. Los enlaces de afiliado están marcados, y el responsable puede recibir una comisión por las compras que cumplan los requisitos.',
+            ],
+          },
+          {
+            heading: 'Tus derechos',
+            body: [
+              'Según el RGPD puedes pedir acceso, rectificación o supresión de los datos personales que haya sobre ti, y oponerte a su tratamiento. Este sitio no recopila datos personales por sí mismo, así que normalmente no hay nada que entregar. Aun así, puedes escribir a la dirección de contacto del aviso legal. También puedes presentar una reclamación ante tu autoridad nacional de protección de datos.',
+            ],
+          },
+          {
+            heading: 'Cambios',
+            body: [
+              'Si esto cambia, por ejemplo si se añadiera analítica, esta página se actualiza primero y cambia la fecha de arriba.',
+            ],
+          },
+        ],
+      },
+      imprint: {
+        title: 'Aviso legal',
+        intro: 'Información sobre quién gestiona este sitio.',
+        sections: [
+          { heading: 'Responsable', body: ['Nombre: donotpanic.space'] },
+          { heading: 'Contacto', body: ['Correo electrónico: hello@donotpanic.space'] },
+          { heading: 'Alojamiento', body: ['Vercel Inc., EE. UU.'] },
+        ],
+      },
+      terms: {
+        title: 'Términos de uso',
+        intro: 'qrc-gen es gratuito. Al usarlo aceptas estos términos.',
+        sections: [
+          {
+            heading: 'El servicio',
+            body: [
+              'qrc-gen crea códigos QR en tu navegador. Se ofrece tal cual, sin garantía de ningún tipo, y puede cambiar o cesar en cualquier momento.',
+            ],
+          },
+          {
+            heading: 'Tu contenido',
+            body: [
+              'Tú decides qué contiene un código. Eres responsable de él, de tener derecho a usar cualquier logotipo o texto que añadas y de a dónde enlaza el código. No uses la herramienta para contenido ilegal, engañoso o dañino, incluidos enlaces a malware o phishing.',
+            ],
+          },
+          {
+            heading: 'Comprueba antes de imprimir',
+            body: [
+              'Escanea siempre un código con más de un dispositivo antes de imprimirlo o publicarlo. Los colores, los logotipos, el margen y las esquinas redondeadas pueden dificultar su lectura. El responsable no responde de los códigos impresos que no se lean.',
+            ],
+          },
+          {
+            heading: 'Responsabilidad',
+            body: [
+              'En la medida que permita la ley, el responsable no responde de los daños derivados del uso de la herramienta ni de los códigos creados con ella. Nada de estos términos limita una responsabilidad que la ley no permita limitar.',
+            ],
+          },
+          {
+            heading: 'Software y enlaces de terceros',
+            body: [
+              'El dibujo del QR usa la biblioteca de código abierto qr-code-styling. Las fuentes de las leyendas son fuentes abiertas con licencia SIL Open Font License. Los enlaces a otros sitios no están bajo el control del responsable.',
+            ],
+          },
+          {
+            heading: 'Enlaces de afiliado',
+            body: ['Algunos enlaces pueden ser de afiliado. Como afiliados de Amazon, ganamos con las compras que cumplen los requisitos.'],
+          },
+        ],
+      },
+    },
+  },
   notFound: {
     heading: 'Página no encontrada.',
     body: 'La página que buscas no existe.',

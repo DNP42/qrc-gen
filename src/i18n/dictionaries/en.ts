@@ -51,6 +51,107 @@ export const en = {
     source: 'source →',
     kofi: 'Free forever. Support the project',
   },
+  legal: {
+    back: '← back to the generator',
+    navLabel: 'Legal',
+    nav: { privacy: 'Privacy', imprint: 'Imprint', terms: 'Terms' },
+    updated: 'Last updated: {date}',
+    pages: {
+      privacy: {
+        title: 'Privacy policy',
+        intro:
+          'qrc-gen is a free tool. It does not ask you to sign in, and it does not collect your data. This page explains what happens anyway.',
+        sections: [
+          {
+            heading: 'What stays in your browser',
+            body: [
+              'Everything you type (links, Wi-Fi details, contact details, titles, captions, logos) is turned into a QR code inside your browser. It is never sent to a server.',
+              'The fonts used for titles and captions are served from this site, not from a third party.',
+            ],
+          },
+          {
+            heading: 'Cookies and storage',
+            body: [
+              'This site sets no cookies and uses no analytics, advertising or tracking tools. For that reason it shows no cookie banner.',
+            ],
+          },
+          {
+            heading: 'Hosting',
+            body: [
+              'This site is hosted on Vercel. When you open a page, Vercel\'s servers process technical data such as your IP address, browser type and the time of the request, to deliver the site and keep it secure. The operator uses this data only to run and secure the site. Legal basis: legitimate interest in running a secure website (Art. 6(1)(f) GDPR).',
+            ],
+          },
+          {
+            heading: 'Links to other sites',
+            body: [
+              'The site links to GitHub, Ko-fi and other pages of DoNotPanic and, where shown, to Amazon. Following a link leaves this site, and the privacy policy of that site applies. Affiliate links are marked, and the operator may earn a commission on qualifying purchases.',
+            ],
+          },
+          {
+            heading: 'Your rights',
+            body: [
+              'Under the GDPR you may ask for access to, correction or deletion of personal data held about you, and you may object to its processing. This site does not collect personal data itself, so there is usually nothing to hand over. You can still write to the contact address in the imprint. You may also complain to your national data protection authority.',
+            ],
+          },
+          {
+            heading: 'Changes',
+            body: [
+              'If this changes, for example if analytics were added, this page is updated first and the date above changes.',
+            ],
+          },
+        ],
+      },
+      imprint: {
+        title: 'Imprint',
+        intro: 'Information about who runs this site.',
+        sections: [
+          { heading: 'Operator', body: ['Name: donotpanic.space'] },
+          { heading: 'Contact', body: ['Email: hello@donotpanic.space'] },
+          { heading: 'Hosting', body: ['Vercel Inc., USA.'] },
+        ],
+      },
+      terms: {
+        title: 'Terms of use',
+        intro: 'qrc-gen is free to use. By using it you agree to these terms.',
+        sections: [
+          {
+            heading: 'The service',
+            body: [
+              'qrc-gen creates QR codes in your browser. It is provided as is, without warranty of any kind, and may change or stop at any time.',
+            ],
+          },
+          {
+            heading: 'Your content',
+            body: [
+              'You decide what a code contains. You are responsible for it, for having the right to use any logo or text you add, and for what the code links to. Do not use the tool for unlawful, deceptive or harmful content, including links to malware or phishing.',
+            ],
+          },
+          {
+            heading: 'Check before you print',
+            body: [
+              'Always scan a code with more than one device before you print or publish it. Colors, logos, padding and rounded corners can make a code harder to read. The operator is not responsible for printed codes that do not scan.',
+            ],
+          },
+          {
+            heading: 'Liability',
+            body: [
+              'To the extent allowed by law, the operator is not liable for damages arising from the use of the tool or from codes made with it. Nothing in these terms limits liability that cannot be limited by law.',
+            ],
+          },
+          {
+            heading: 'Third-party software and links',
+            body: [
+              'The QR drawing uses the open-source library qr-code-styling. The caption fonts are open fonts under the SIL Open Font License. Links to other sites are not under the operator\'s control.',
+            ],
+          },
+          {
+            heading: 'Affiliate links',
+            body: ['Some links may be affiliate links. As an Amazon Associate we earn from qualifying purchases.'],
+          },
+        ],
+      },
+    },
+  },
   // Unknown URLs have no language, so global-not-found.tsx shows every
   // language's block one after the other.
   notFound: {

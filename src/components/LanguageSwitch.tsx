@@ -9,7 +9,7 @@ import { useDict, useLocale } from '@/i18n/I18nProvider';
  * EN | SL | ES links. The URL is the language, so there is nothing to store;
  * switching loads the other page and resets the form.
  */
-export function LanguageSwitch() {
+export function LanguageSwitch({ path = '' }: { path?: string }) {
   const t = useDict();
   const current = useLocale();
 
@@ -23,7 +23,7 @@ export function LanguageSwitch() {
             </span>
           )}
           <Link
-            href={`/${locale}`}
+            href={`/${locale}${path}`}
             hrefLang={locale}
             lang={locale}
             title={localeNames[locale]}

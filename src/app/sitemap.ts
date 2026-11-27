@@ -5,12 +5,21 @@ const SITE = "https://qr.donotpanic.space";
 
 export const dynamic = "force-static";
 
+const PAGES = [
+  { path: "", priority: 1 },
+  { path: "/privacy", priority: 0.3 },
+  { path: "/imprint", priority: 0.3 },
+  { path: "/terms", priority: 0.3 },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const languages = Object.fromEntries(locales.map((l) => [l, `${SITE}/${l}`]));
-  return locales.map((lang) => ({
-    url: `${SITE}/${lang}`,
-    changeFrequency: "monthly",
-    priority: 1,
-    alternates: { languages },
-  }));
+  return PAGES.flatMap(({ path, priority }) => {
+    const languages = Object.fromEntries(locales.map((l) => [l, `${SITE}/${l}${path}`]));
+    return locales.map((lang) => ({
+      url: `${SITE}/${lang}${path}`,
+      changeFrequency: "monthly" as const,
+      priority,
+      alternates: { languages },
+    }));
+  });
 }
