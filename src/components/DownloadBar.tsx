@@ -28,11 +28,11 @@ export function DownloadBar({ previewRef, defaultName, config, caption }: Props)
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9_\-]/g, '-') || fallbackName;
 
-  // No caption: the original download path, untouched. With a caption the
-  // composite is built from a fresh QR render plus the caption layout.
+  // Plain SVG: the original download path, untouched. PNG always goes through
+  // the composite so it is exported larger and on an opaque backdrop.
   const download = async (ext: 'png' | 'svg') => {
     setFailed(false);
-    if (!isCaptionActive(caption)) {
+    if (ext === 'svg' && !isCaptionActive(caption)) {
       previewRef.current?.download(ext, safe);
       return;
     }

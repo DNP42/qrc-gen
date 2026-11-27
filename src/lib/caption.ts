@@ -10,14 +10,17 @@ import QRCodeStyling from 'qr-code-styling';
 import { buildOptions, textToImage, type QRConfig } from '@/lib/qr';
 
 export type CaptionStyle = 'none' | 'text' | 'bar';
-export type CaptionPosition = 'below' | 'above';
 export type CaptionAlign = 'left' | 'center' | 'right';
 export type CaptionFontId = 'inter' | 'playfair' | 'nunito' | 'jetbrains' | 'anton';
 
 export interface CaptionConfig {
+  /** Headline above the QR. */
+  title: string;
+  /** Title size in px on the default 320px code; scales with the code size. */
+  titleSize: number;
+  /** Caption below the QR. */
   text: string;
   style: CaptionStyle;
-  position: CaptionPosition;
   align: CaptionAlign;
   font: CaptionFontId;
   /** Font size in px on the default 320px code; scales with the code size. */
@@ -34,11 +37,16 @@ export const CAPTION_MAX_LINES = 6;
 const LINE_HEIGHT = 1.25;
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 48;
+export const TITLE_SIZE_MIN = 12;
+export const TITLE_SIZE_MAX = 72;
+/** The PNG is rendered this many times larger than the on-screen code. */
+export const EXPORT_SCALE = 3;
 
 export const DEFAULT_CAPTION: CaptionConfig = {
+  title: '',
+  titleSize: 32,
   text: '',
   style: 'bar',
-  position: 'below',
   align: 'center',
   font: 'inter',
   fontSize: 24,
@@ -76,7 +84,7 @@ export function captionLines(text: string): string[] {
 }
 
 export function isCaptionActive(c: CaptionConfig): boolean {
-  return c.style !== 'none' && c.text.trim().length > 0;
+  return c.style !== 'none' && (c.title.trim().length > 0 || c.text.trim().length > 0);
 }
 
 // ---------------------------------------------------------------- fonts
@@ -106,6 +114,17 @@ export function loadCaptionFont(id: CaptionFontId): Promise<ArrayBuffer> {
 
 // --------------------------------------------------------------- layout
 
+export interface TextBlock {
+  x: number;
+  anchor: 'start' | 'middle' | 'end';
+  size: number;
+  color: string;
+  /** One entry per line; `y` is the baseline. */
+  lines: { str: string; y: number }[];
+  family: string;
+  weight: number;
+}
+
 export interface CaptionLayout {
   active: boolean;
   w: number;
@@ -117,18 +136,10 @@ export interface CaptionLayout {
   /** Bar style: outer frame minus the QR window, filled with `frameColor`. */
   framePath: string | null;
   frameColor: string;
-  /** Plain-text style: a strip filled with the QR background. */
-  strip: { x: number; y: number; w: number; h: number; color: string } | null;
-  text: {
-    x: number;
-    anchor: 'start' | 'middle' | 'end';
-    size: number;
-    color: string;
-    /** One entry per caption line; `y` is the baseline. */
-    lines: { str: string; y: number }[];
-    family: string;
-    weight: number;
-  } | null;
+  /** Plain-text style: strips filled with the QR background. */
+  strips: { x: number; y: number; w: number; h: number; color: string }[];
+  /** Title (above the QR) and caption (below it), in that order. */
+  blocks: TextBlock[];
 }
 
 let measureCtx: CanvasRenderingContext2D | null = null;
@@ -174,67 +185,67 @@ export function computeLayout(
   const size = qr.size;
   const base: CaptionLayout = {
     active: false, w: size, h: size, qrX: 0, qrY: 0, qrSize: size,
-    framePath: null, frameColor: qr.fgColor, strip: null, text: null,
+    framePath: null, frameColor: qr.fgColor, strips: [], blocks: [],
   };
   if (!isCaptionActive(cap)) return base;
 
   const k = size / 320;
   const font = fontById(cap.font);
-  const fs = Math.round(cap.fontSize * k);
-  const below = cap.position === 'below';
   const bar = cap.style === 'bar';
   const anchor = cap.align === 'left' ? 'start' : cap.align === 'right' ? 'end' : 'middle';
   const barColor = cap.barColor ?? qr.fgColor;
   const textColor = cap.textColor ?? (bar ? qr.bgColor : qr.fgColor);
-  const rows = captionLines(cap.text);
-  const n = rows.length;
+
+  const title = { rows: captionLines(cap.title), fs: Math.round(cap.titleSize * k) };
+  const caption = { rows: captionLines(cap.text), fs: Math.round(cap.fontSize * k) };
+  const bandHeight = (s: { rows: string[]; fs: number }) =>
+    s.rows.length === 0
+      ? 0
+      : Math.round(s.fs * (LINE_HEIGHT * s.rows.length + (bar ? 0.35 : 0.25)) + (bar ? 16 : 12) * k);
+  const topH = bandHeight(title);
+  const botH = bandHeight(caption);
+
+  // Bar style keeps a thin border on a side that has no text.
+  const b = bar ? Math.round(14 * k) : 0;
+  const innerR = Math.round(14 * k);
+  const outerR = innerR + b;
+  const w = size + 2 * b;
+  const padX = bar ? b + Math.round(8 * k) : Math.round(12 * k);
+  const qrY = topH || b;
+  const bottomY = qrY + size;
+  const h = bottomY + (botH || b);
+
+  const blocks: TextBlock[] = [];
+  const addBlock = (s: { rows: string[]; fs: number }, centerY: number) => {
+    if (s.rows.length === 0) return;
+    const fit = s.rows.map((r) => fitText(r, font, s.fs, w - 2 * padX));
+    blocks.push({
+      x: anchor === 'start' ? padX : anchor === 'end' ? w - padX : w / 2,
+      lines: baselines(fit.length, centerY, s.fs, fit[0].capH).map((y, i) => ({ str: fit[i].str, y })),
+      anchor, size: s.fs, color: textColor, family: font.family, weight: font.weight,
+    });
+  };
+  addBlock(title, topH / 2);
+  addBlock(caption, bottomY + botH / 2);
 
   if (bar) {
-    const b = Math.round(14 * k);
-    const innerR = Math.round(14 * k);
-    const outerR = innerR + b;
-    const bandH = Math.round(fs * (LINE_HEIGHT * n + 0.35) + 16 * k);
-    const w = size + 2 * b;
-    const h = size + b + bandH;
-    const qrX = b;
-    const qrY = below ? b : bandH;
-    const padX = b + Math.round(8 * k);
-    const fit = rows.map((r) => fitText(r, font, fs, w - 2 * padX));
-    const capH = fit[0].capH;
-    const bandY = below ? b + size : 0;
-    const cy = bandY + bandH / 2;
-    const hole: [number, number, number, number] = below
-      ? [innerR, innerR, 0, 0]
-      : [0, 0, innerR, innerR];
+    // A side with a text band meets the QR square; a side with only a border is rounded.
+    const hole: [number, number, number, number] = [
+      topH ? 0 : innerR, topH ? 0 : innerR, botH ? 0 : innerR, botH ? 0 : innerR,
+    ];
     return {
       ...base,
-      active: true, w, h, qrX, qrY,
+      active: true, w, h, qrX: b, qrY,
       frameColor: barColor,
-      framePath: rrect(0, 0, w, h, [outerR, outerR, outerR, outerR]) + rrect(qrX, qrY, size, size, hole),
-      text: {
-        x: anchor === 'start' ? padX : anchor === 'end' ? w - padX : w / 2,
-        lines: baselines(n, cy, fs, capH).map((y, i) => ({ str: fit[i].str, y })),
-        anchor, size: fs, color: textColor, family: font.family, weight: font.weight,
-      },
+      framePath: rrect(0, 0, w, h, [outerR, outerR, outerR, outerR]) + rrect(b, qrY, size, size, hole),
+      blocks,
     };
   }
 
-  const stripH = Math.round(fs * (LINE_HEIGHT * n + 0.25) + 12 * k);
-  const padX = Math.round(12 * k);
-  const h = size + stripH;
-  const stripY = below ? size : 0;
-  const fit = rows.map((r) => fitText(r, font, fs, size - 2 * padX));
-  const capH = fit[0].capH;
-  return {
-    ...base,
-    active: true, h, qrY: below ? 0 : stripH,
-    strip: { x: 0, y: stripY, w: size, h: stripH, color: qr.bgColor },
-    text: {
-      x: anchor === 'start' ? padX : anchor === 'end' ? size - padX : size / 2,
-      lines: baselines(n, stripY + stripH / 2, fs, capH).map((y, i) => ({ str: fit[i].str, y })),
-      anchor, size: fs, color: textColor, family: font.family, weight: font.weight,
-    },
-  };
+  const strips = [];
+  if (topH) strips.push({ x: 0, y: 0, w, h: topH, color: qr.bgColor });
+  if (botH) strips.push({ x: 0, y: bottomY, w, h: botH, color: qr.bgColor });
+  return { ...base, active: true, w, h, qrX: 0, qrY, strips, blocks };
 }
 
 // --------------------------------------------------------------- export
@@ -246,8 +257,20 @@ function overlayImage(config: QRConfig): string | undefined {
   return undefined;
 }
 
-function rawQr(config: QRConfig, type: 'canvas' | 'svg') {
-  return new QRCodeStyling({ ...buildOptions(config, overlayImage(config)), type });
+/**
+ * `scale` only enlarges the render (size, margin, logo gap in pixels). The
+ * encoded data, error correction and styles are exactly buildOptions()'s.
+ */
+function rawQr(config: QRConfig, type: 'canvas' | 'svg', scale = 1) {
+  const o = buildOptions(config, overlayImage(config));
+  return new QRCodeStyling({
+    ...o,
+    type,
+    width: (o.width ?? config.size) * scale,
+    height: (o.height ?? config.size) * scale,
+    margin: (o.margin ?? 0) * scale,
+    imageOptions: { ...o.imageOptions, margin: (o.imageOptions?.margin ?? 0) * scale },
+  });
 }
 
 function escapeXml(s: string): string {
@@ -263,10 +286,15 @@ function toBase64(buf: ArrayBuffer): string {
   return btoa(bin);
 }
 
+/**
+ * PNG at EXPORT_SCALE x the on-screen size, on an opaque white backdrop.
+ * Chat apps such as WhatsApp recompress images to JPEG: a small image turns
+ * soft, and transparent corners (the rounded bar frame) turn black.
+ */
 export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promise<Blob> {
   await loadCaptionFont(cap.font);
-  const layout = computeLayout(config, cap);
-  const blob = (await rawQr(config, 'canvas').getRawData('png')) as Blob | null;
+  const layout = computeLayout({ ...config, size: config.size * EXPORT_SCALE }, cap);
+  const blob = (await rawQr(config, 'canvas', EXPORT_SCALE).getRawData('png')) as Blob | null;
   if (!blob) throw new Error('QR render failed');
   const bmp = await createImageBitmap(blob);
   const canvas = document.createElement('canvas');
@@ -274,22 +302,23 @@ export async function captionedPng(config: QRConfig, cap: CaptionConfig): Promis
   canvas.height = layout.h;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('canvas unavailable');
-  if (layout.strip) {
-    ctx.fillStyle = layout.strip.color;
-    ctx.fillRect(layout.strip.x, layout.strip.y, layout.strip.w, layout.strip.h);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, layout.w, layout.h);
+  for (const strip of layout.strips) {
+    ctx.fillStyle = strip.color;
+    ctx.fillRect(strip.x, strip.y, strip.w, strip.h);
   }
   ctx.drawImage(bmp, layout.qrX, layout.qrY, layout.qrSize, layout.qrSize);
   if (layout.framePath) {
     ctx.fillStyle = layout.frameColor;
     ctx.fill(new Path2D(layout.framePath), 'evenodd');
   }
-  const t = layout.text;
-  if (t) {
-    ctx.font = `${t.weight} ${t.size}px "${t.family}", sans-serif`;
-    ctx.fillStyle = t.color;
-    ctx.textAlign = t.anchor === 'start' ? 'left' : t.anchor === 'end' ? 'right' : 'center';
+  for (const block of layout.blocks) {
+    ctx.font = `${block.weight} ${block.size}px "${block.family}", sans-serif`;
+    ctx.fillStyle = block.color;
+    ctx.textAlign = block.anchor === 'start' ? 'left' : block.anchor === 'end' ? 'right' : 'center';
     ctx.textBaseline = 'alphabetic';
-    for (const l of t.lines) ctx.fillText(l.str, t.x, l.y);
+    for (const l of block.lines) ctx.fillText(l.str, block.x, l.y);
   }
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG encode failed'))), 'image/png'),
@@ -309,21 +338,20 @@ export async function captionedSvg(config: QRConfig, cap: CaptionConfig): Promis
   const qrMarkup = new XMLSerializer().serializeToString(inner);
 
   const parts: string[] = [];
-  const t = layout.text;
-  if (t) {
+  const first = layout.blocks[0];
+  if (first) {
     parts.push(
-      `<defs><style>@font-face{font-family:"${t.family}";font-weight:${t.weight};src:url(data:font/woff2;base64,${toBase64(fontBuf)}) format("woff2")}</style></defs>`,
+      `<defs><style>@font-face{font-family:"${first.family}";font-weight:${first.weight};src:url(data:font/woff2;base64,${toBase64(fontBuf)}) format("woff2")}</style></defs>`,
     );
   }
-  if (layout.strip) {
-    const s = layout.strip;
+  for (const s of layout.strips) {
     parts.push(`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${s.color}"/>`);
   }
   parts.push(qrMarkup);
   if (layout.framePath) {
     parts.push(`<path d="${layout.framePath}" fill="${layout.frameColor}" fill-rule="evenodd"/>`);
   }
-  if (t) {
+  for (const t of layout.blocks) {
     for (const l of t.lines) {
       parts.push(
         `<text x="${t.x}" y="${l.y}" text-anchor="${t.anchor}" font-family="${t.family}, sans-serif" font-weight="${t.weight}" font-size="${t.size}" fill="${t.color}">${escapeXml(l.str)}</text>`,
