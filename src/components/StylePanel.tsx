@@ -2,7 +2,7 @@
 
 import { useDict } from '@/i18n/I18nProvider';
 import type { Dictionary } from '@/i18n/dictionaries/en';
-import { interpolate } from '@/i18n/format';
+import { NumberStepper } from './NumberStepper';
 import {
   IMAGE_MARGIN_MAX,
   IMAGE_MARGIN_MIN,
@@ -54,7 +54,7 @@ export function StylePanel({ config, onChange }: Props) {
                 className={`flex items-center gap-2 px-3 py-2 rounded-md border font-mono text-xs uppercase tracking-wider transition ${
                   active
                     ? 'border-[var(--hawk)] text-[var(--hawk)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
+                    : 'border-[var(--control-border)] text-[var(--muted)] hover:border-[var(--hawk)] hover:text-white'
                 }`}
               >
                 <span
@@ -147,22 +147,15 @@ export function StylePanel({ config, onChange }: Props) {
       </Section>
 
       <Section title={t.padding}>
-        <div className="flex items-center gap-3">
-          <input
-            type="range"
-            className="range min-w-0 flex-1"
-            min={MARGIN_MIN}
-            max={MARGIN_MAX}
-            step={2}
-            value={config.margin}
-            aria-label={t.padding}
-            onChange={(e) => update({ margin: clampMargin(Number(e.target.value), config.size) })}
-          />
-          <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
-            {interpolate(t.paddingValue, { n: config.margin })}
-          </span>
-        </div>
-        <p className="mt-1 font-mono text-xs text-[var(--muted)]">{t.paddingHint}</p>
+        <NumberStepper
+          value={config.margin}
+          min={MARGIN_MIN}
+          max={Math.min(MARGIN_MAX, Math.floor(config.size / 4))}
+          step={2}
+          label={t.padding}
+          onChange={(margin) => update({ margin: clampMargin(margin, config.size) })}
+        />
+        <p className="mt-2 text-xs text-[var(--muted)]">{t.paddingHint}</p>
       </Section>
 
       <Section title={t.overlay}>
@@ -170,21 +163,13 @@ export function StylePanel({ config, onChange }: Props) {
         {config.overlay.kind !== 'none' && (
           <div className="mt-3">
             <div className="label">{t.imageMargin}</div>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                className="range min-w-0 flex-1"
-                min={IMAGE_MARGIN_MIN}
-                max={IMAGE_MARGIN_MAX}
-                step={1}
-                value={config.imageMargin}
-                aria-label={t.imageMargin}
-                onChange={(e) => update({ imageMargin: Number(e.target.value) })}
-              />
-              <span className="font-mono text-xs text-[var(--hawk)] tabular-nums w-14 text-right">
-                {interpolate(t.paddingValue, { n: config.imageMargin })}
-              </span>
-            </div>
+            <NumberStepper
+              value={config.imageMargin}
+              min={IMAGE_MARGIN_MIN}
+              max={IMAGE_MARGIN_MAX}
+              label={t.imageMargin}
+              onChange={(imageMargin) => update({ imageMargin })}
+            />
           </div>
         )}
       </Section>
@@ -222,7 +207,7 @@ export function Pills<T extends string>({
           className={`px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider border transition ${
             value === opt
               ? 'border-[var(--hawk)] text-[var(--hawk)] bg-[rgba(57,255,122,0.06)]'
-              : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
+              : 'border-[var(--control-border)] text-[var(--muted)] hover:border-[var(--hawk)] hover:text-white'
           }`}
         >
           {labels[opt]}
@@ -249,7 +234,7 @@ export function ColorPick({
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
-          className="w-10 h-10 rounded-md bg-transparent border border-[var(--border)] cursor-pointer"
+          className="w-10 h-10 rounded-md bg-transparent border border-[var(--control-border)] cursor-pointer"
           aria-label={label}
         />
         <input
@@ -305,7 +290,7 @@ function OverlayControls({
             className={`px-3 py-1.5 rounded-md font-mono text-xs uppercase tracking-wider border transition ${
               kind === k
                 ? 'border-[var(--hawk)] text-[var(--hawk)] bg-[rgba(57,255,122,0.06)]'
-                : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-hot)] hover:text-white'
+                : 'border-[var(--control-border)] text-[var(--muted)] hover:border-[var(--hawk)] hover:text-white'
             }`}
           >
             {t.overlayKinds[k]}
