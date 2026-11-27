@@ -1,8 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRef, useState } from 'react';
-import { ContentTabs, type ContentType } from '@/components/ContentTabs';
+import { useMemo, useRef, useState } from 'react';
+import { ContentTabs } from '@/components/ContentTabs';
 import { Card } from '@/components/Card';
 import { DesignPanel } from '@/components/DesignPanel';
 import { LogoPanel } from '@/components/LogoPanel';
@@ -12,16 +12,21 @@ import { DownloadBar } from '@/components/DownloadBar';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
 import { AffiliateBlock } from '@/components/AffiliateBlock';
 import { MoreFrom } from '@/components/MoreFrom';
+import { SavedCodes } from '@/components/SavedCodes';
 import { SiteFooter } from '@/components/SiteFooter';
 import type { QRPreviewHandle } from '@/components/QRPreview';
 import { useDict } from '@/i18n/I18nProvider';
+import { interpolate } from '@/i18n/format';
 import {
   CAPTION_SIZE_MAX,
   DEFAULT_CAPTION,
   TITLE_SIZE_MAX,
   type CaptionConfig,
 } from '@/lib/caption';
+import { DEFAULT_CONTENT, encodeContent, type ContentState } from '@/lib/content';
 import { DEFAULT_CONFIG, type QRConfig } from '@/lib/qr';
+import type { SavedCode } from '@/lib/saved-codes';
+import { useSavedCodes } from '@/lib/use-saved-codes';
 
 const QRPreview = dynamic(
   () => import('@/components/QRPreview').then((m) => m.QRPreview),
@@ -33,17 +38,23 @@ const QRPreview = dynamic(
 
 export function Generator() {
   const t = useDict();
-  const [config, setConfig] = useState<QRConfig>(DEFAULT_CONFIG);
+  const [content, setContent] = useState<ContentState>(DEFAULT_CONTENT);
+  const [design, setDesign] = useState<QRConfig>(DEFAULT_CONFIG);
   const [caption, setCaption] = useState<CaptionConfig>(DEFAULT_CAPTION);
-  const [contentType, setContentType] = useState<ContentType>('url');
+  const { codes: savedCodes } = useSavedCodes();
   const previewRef = useRef<QRPreviewHandle | null>(null);
 
-  const handleContent = (data: string, type: ContentType) => {
-    setConfig((prev) => ({ ...prev, data }));
-    setContentType(type);
+  // The encoded string always follows the Content card; every other setting lives in `design`.
+  const config = useMemo(() => ({ ...design, data: encodeContent(content) }), [design, content]);
+  const setConfig = (next: QRConfig) => setDesign(next);
+
+  const loadSaved = (code: SavedCode) => {
+    setContent(code.content);
+    setDesign({ ...code.design, data: DEFAULT_CONFIG.data });
+    setCaption(code.caption);
   };
 
-  const filename = t.download.defaultNames[contentType];
+  const filename = t.download.defaultNames[content.type];
   const firstLine = (text: string) => text.trim().split(/\r?\n/)[0] || t.cards.empty;
   const followColor = caption.frame.style === 'bar' ? config.bgColor : config.fgColor;
 
@@ -87,7 +98,7 @@ export function Generator() {
         <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,max-content)]">
           <div className="min-w-0 space-y-8">
             <Card title={t.cards.content} collapsible defaultOpen>
-              <ContentTabs onChange={handleContent} />
+              <ContentTabs value={content} onChange={setContent} />
             </Card>
 
             <Card title={t.cards.design} collapsible defaultOpen>
@@ -142,6 +153,21 @@ export function Generator() {
               summary={t.style.overlayKinds[config.overlay.kind]}
             >
               <LogoPanel config={config} onChange={setConfig} />
+            </Card>
+
+            <Card
+              title={t.saved.title}
+              collapsible
+              defaultOpen={false}
+              summary={interpolate(t.saved.count, { n: savedCodes.length })}
+            >
+              <SavedCodes
+                content={content}
+                config={config}
+                caption={caption}
+                defaultName={filename}
+                onLoad={loadSaved}
+              />
             </Card>
           </div>
 

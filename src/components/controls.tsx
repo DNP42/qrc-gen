@@ -1,5 +1,7 @@
 'use client';
 
+import { useId, useState } from 'react';
+
 /** Small form controls shared by the cards. */
 
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -42,6 +44,9 @@ export function Pills<T extends string>({
   );
 }
 
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/** Color swatch plus hex field. Only a complete #RRGGBB value is passed on; typing keeps its own draft. */
 export function ColorPick({
   label,
   value,
@@ -51,9 +56,14 @@ export function ColorPick({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const id = useId();
+  const [draft, setDraft] = useState<string | null>(null);
+
   return (
     <div>
-      <div className="label">{label}</div>
+      <label className="label" htmlFor={id}>
+        {label}
+      </label>
       <div className="flex gap-2 items-center">
         <input
           type="color"
@@ -63,9 +73,16 @@ export function ColorPick({
           aria-label={label}
         />
         <input
+          id={id}
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          value={draft ?? value}
+          maxLength={7}
+          onChange={(e) => {
+            const next = e.target.value.toUpperCase();
+            setDraft(next);
+            if (HEX_COLOR.test(next)) onChange(next);
+          }}
+          onBlur={() => setDraft(null)}
           className="field flex-1"
           placeholder="#000000"
         />
